@@ -1,0 +1,29 @@
+{
+  "name": "encontre-na-ufms",
+  "version": "1.0.0",
+  "description": "",
+  "main": "index.js",
+  "scripts": {
+    "dev": "tsx watch src/server.ts",
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/wildevn/EncontreNaUfms.git"
+  },
+  "author": "wildevn",
+  "license": "ISC",
+  "bugs": {
+    "url": "https://github.com/wildevn/EncontreNaUfms/issues"
+  },
+  "homepage": "https://github.com/wildevn/EncontreNaUfms#readme",
+  "dependencies": {
+    "@biomejs/biome": "1.8.3",
+    "fastify": "^4.28.1"
+  },
+  "devDependencies": {
+    "@types/node": "^22.5.1",
+    "tsx": "^4.19.0",
+    "typescript": "^5.5.4"
+  }
+}
