@@ -1,9 +1,9 @@
 
-CREATE DATABASE encontreNaUfms;
+-- CREATE DATABASE encontreNaUfms;
 
 -- Creating tables
 CREATE TABLE `Users` (
-    `id` int NOT NULL AUTO_INCREMENT,
+    `id` int NOT NULL AUTO_INCREMENT PRIMARY KEY,
     `name` varchar(255) NOT NULL,
     `email` varchar(255) NOT NULL,
     `password` varchar(255) NOT NULL,
@@ -12,7 +12,7 @@ CREATE TABLE `Users` (
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
 
 CREATE TABLE `Locales` (
-    `id` int NOT NULL AUTO_INCREMENT,
+    `id` int NOT NULL AUTO_INCREMENT PRIMARY KEY,
     `name` varchar(255) NOT NULL,
     `localizationLink` varchar(255) NOT NULL,
     `about` text, -- old description
@@ -38,7 +38,7 @@ CREATE TABLE `ScheduledHours` (
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
 
 CREATE TABLE `Photos` (
-    `id` int NOT NULL AUTO_INCREMENT,
+    `id` int NOT NULL AUTO_INCREMENT PRIMARY KEY,
     `localeId` int NOT NULL,
     `name` varchar(255) NOT NULL,
     `data` BLOB NOT NULL,
@@ -83,7 +83,7 @@ CREATE TABLE `AcademicBlocks` (
 
 CREATE TABLE `Libraries` (
     `localeId` int NOT NULL,
-    `availableSports` varchar(255) NOT NULL,
+    `libraryLink` varchar(30) NOT NULL,
     `rules` text,
     `createdAt` datetime NOT NULL,
     `updatedAt` datetime NOT NULL
@@ -91,7 +91,7 @@ CREATE TABLE `Libraries` (
 
 CREATE TABLE `Sports` (
     `localeId` int NOT NULL,
-    `libraryLink` varchar(30) NOT NULL,
+    `availableSports` varchar(255) NOT NULL,
     `rules` text,
     `createdAt` datetime NOT NULL,
     `updatedAt` datetime NOT NULL
@@ -104,19 +104,12 @@ CREATE TABLE `Transports` (
     `updatedAt` datetime NOT NULL
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
 
--- Constraints and primary keys --
-ALTER TABLE `Users`
-    ADD PRIMARY KEY (`id`);
-
-ALTER TABLE `Locales`
-    ADD PRIMARY KEY (`id`);
-
+-- Constraints --
 ALTER TABLE `ScheduledHours`
     ADD KEY `localeId` (`localeId`),
     ADD CONSTRAINT `ScheduledHours_ibfk_1` FOREIGN KEY (`localeId`) REFERENCES `Locales` (`id`) ON DELETE CASCADE ON UPDATE CASCADE;
 
 ALTER TABLE `Photos`
-    ADD PRIMARY KEY (`id`),
     ADD KEY `localeId` (`localeId`),
     ADD CONSTRAINT `Photos_ibfk_1` FOREIGN KEY (`localeId`) REFERENCES `Locales` (`id`) ON DELETE CASCADE ON UPDATE CASCADE;
 
