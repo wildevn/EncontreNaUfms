@@ -63,7 +63,7 @@ CREATE TABLE `Histories` (
 CREATE TABLE `Reviews` (
     `userId` int NOT NULL,
     `localeId` int NOT NULL,
-    `grade` numeric NOT NULL DEFAULT '1',
+    `grade` numeric NOT NULL DEFAULT '0',
     `createdAt` datetime NOT NULL,
     `updatedAt` datetime NOT NULL
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;

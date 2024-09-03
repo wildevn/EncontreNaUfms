@@ -5,7 +5,9 @@
   "main": "index.js",
   "scripts": {
     "dev": "tsx watch src/server.ts",
-    "test": "echo \"Error: no test specified\" && exit 1"
+    "test": "echo \"Error: no test specified\" && exit 1",
+    "migration": "drizzle-kit generate",
+    "drizzle": "tsx ./database/index.ts"
   },
   "repository": {
     "type": "git",
@@ -20,8 +22,10 @@
   "dependencies": {
     "@biomejs/biome": "1.8.3",
     "dotenv": "^16.4.5",
+    "drizzle-orm": "^0.33.0",
     "encontre-na-ufms": "file:",
     "fastify": "^4.28.1",
+    "mysql2": "^3.11.0",
     "ts-node": "^10.9.2"
   },
   "devDependencies": {
