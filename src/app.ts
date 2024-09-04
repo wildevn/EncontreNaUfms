@@ -8,8 +8,4 @@ const app = Fastify({
 
 app.register(routes);
 
-// app.get('/', (request, reply) => {
-//     reply.send({ hello: 'world' });
-// });
-
 export default app;

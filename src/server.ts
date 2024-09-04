@@ -1,7 +1,7 @@
 import "module-alias/register";
 import app from "./app";
-import { db } from "./db";
-import { Users } from "@database/schema";
+// import { db } from "./db";
+// import { Users } from "@database/schema";
 
 const server = async () => {
   const port = process.env.SERVER_PORT
