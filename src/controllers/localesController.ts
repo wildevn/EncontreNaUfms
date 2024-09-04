@@ -1,5 +1,5 @@
-import showAllService from "../services/localesServices/showAllService";
-import listCategoryService from "../services/localesServices/listCategoryService";
+import showLocalesService from "@/services/localesServices/showLocalesService";
+import listSectionService from "@services/localesServices/listSectionService";
 import type {
   FastifyBaseLogger,
   FastifyReply,
@@ -10,7 +10,6 @@ import type {
   RouteShorthandOptions,
 } from "fastify";
 import type { IncomingMessage, ServerResponse } from "node:http";
-import listSectionService from "@services/localesServices/listSectionService";
 
 type CategoryRequest = FastifyRequest<{
   Params: { category: string };
@@ -67,7 +66,7 @@ export const listSectionOpts: RouteShorthandOptions<
 };
 
 const showAll = async (request: FastifyRequest, reply: FastifyReply) => {
-  const locales = await showAllService();
+  const locales = await showLocalesService();
 
   reply.send({ data: locales });
 };
@@ -75,7 +74,7 @@ const showAll = async (request: FastifyRequest, reply: FastifyReply) => {
 const listCategory = async (request: CategoryRequest, reply: FastifyReply) => {
   const { category } = request.params;
 
-  const locales = await listCategoryService(category);
+  const locales = await showLocalesService(Number.parseInt(category));
 
   reply.send({ data: locales });
 };

@@ -4,7 +4,7 @@ import { db } from "@/db";
 import { Locales, Photos, ScheduledHours } from "@database/schema";
 import { eq } from "drizzle-orm";
 
-type LocaleRow = {
+export type LocaleRow = {
   id: number;
   name: string;
   address: string;
@@ -17,7 +17,7 @@ type LocaleRow = {
   isOpen?: boolean;
 };
 
-type ScheduledHoursRow = {
+export type ScheduledHoursRow = {
   localeId: number | null; // didn't recognize as a value that can't be actually null
   sundayHours: string | null;
   mondayHours: string | null;
@@ -28,7 +28,7 @@ type ScheduledHoursRow = {
   saturdayHours: string | null;
 };
 
-const scheduleAttributes = [
+export const scheduleAttributes = [
   "sundayHours",
   "mondayHours",
   "tuesdayHours",
@@ -42,7 +42,7 @@ const reduceHours = (array: string[]): number => {
   return Number.parseInt(array[0]) + Number.parseInt(array[1]) * 60;
 };
 
-const isOpenned = (scheduleRow: ScheduledHoursRow): number => {
+export const isOpenned = (scheduleRow: ScheduledHoursRow): number => {
   const now = new Date();
   const dayAttribute: string = scheduleAttributes[now.getDay()];
   // format 15:00 - 23:00
@@ -62,22 +62,38 @@ const isOpenned = (scheduleRow: ScheduledHoursRow): number => {
   return 0;
 };
 
-const showAllService = async () => {
+const showLocalesService = async (category?: number) => {
   const dbConnection = await db();
-  const localeRows: LocaleRow[] = await dbConnection
-    .select({
-      id: Locales.id,
-      name: Locales.name,
-      address: Locales.address,
-      mainPhoto: {
-        id: Photos.id,
-        name: Photos.name,
-        data: Photos.data,
-      },
-      type: Locales.type,
-    })
-    .from(Locales)
-    .leftJoin(Photos, eq(Locales.id, Photos.localeId));
+  const localeRows: LocaleRow[] = category
+    ? await dbConnection
+        .select({
+          id: Locales.id,
+          name: Locales.name,
+          address: Locales.address,
+          mainPhoto: {
+            id: Photos.id,
+            name: Photos.name,
+            data: Photos.data,
+          },
+          type: Locales.type,
+        })
+        .from(Locales)
+        .leftJoin(Photos, eq(Locales.id, Photos.localeId))
+        .where(eq(Locales.type, category))
+    : await dbConnection
+        .select({
+          id: Locales.id,
+          name: Locales.name,
+          address: Locales.address,
+          mainPhoto: {
+            id: Photos.id,
+            name: Photos.name,
+            data: Photos.data,
+          },
+          type: Locales.type,
+        })
+        .from(Locales)
+        .leftJoin(Photos, eq(Locales.id, Photos.localeId));
 
   // console.log(localeRows);
 
@@ -111,4 +127,4 @@ const showAllService = async () => {
   return localeRows;
 };
 
-export default showAllService;
+export default showLocalesService;
