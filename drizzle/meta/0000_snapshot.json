@@ -503,50 +503,50 @@
           "notNull": true,
           "autoincrement": false
         },
-        "sunday_hours": {
-          "name": "sunday_hours",
+        "sundayHours": {
+          "name": "sundayHours",
           "type": "varchar(20)",
           "primaryKey": false,
           "notNull": false,
           "autoincrement": false
         },
-        "monday_hours": {
-          "name": "monday_hours",
+        "mondayHours": {
+          "name": "mondayHours",
           "type": "varchar(20)",
           "primaryKey": false,
           "notNull": false,
           "autoincrement": false
         },
-        "tuesday_hours": {
-          "name": "tuesday_hours",
+        "tuesdayHours": {
+          "name": "tuesdayHours",
           "type": "varchar(20)",
           "primaryKey": false,
           "notNull": false,
           "autoincrement": false
         },
-        "wednesday_hours": {
-          "name": "wednesday_hours",
+        "wednesdayHours": {
+          "name": "wednesdayHours",
           "type": "varchar(20)",
           "primaryKey": false,
           "notNull": false,
           "autoincrement": false
         },
-        "thursday_hours": {
-          "name": "thursday_hours",
+        "thursdayHours": {
+          "name": "thursdayHours",
           "type": "varchar(20)",
           "primaryKey": false,
           "notNull": false,
           "autoincrement": false
         },
-        "friday_hours": {
-          "name": "friday_hours",
+        "fridayHours": {
+          "name": "fridayHours",
           "type": "varchar(20)",
           "primaryKey": false,
           "notNull": false,
           "autoincrement": false
         },
-        "saturday_hours": {
-          "name": "saturday_hours",
+        "saturdayHours": {
+          "name": "saturdayHours",
           "type": "varchar(20)",
           "primaryKey": false,
           "notNull": false,

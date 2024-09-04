@@ -15,6 +15,7 @@ CREATE TABLE `Locales` (
     `id` int NOT NULL AUTO_INCREMENT PRIMARY KEY,
     `name` varchar(255) NOT NULL,
     `localizationLink` varchar(255) NOT NULL,
+    `address` varchar(60) NOT NULL,
     `about` text, -- old description
     `observation` text,
     `type` tinyint(2) NOT NULL,

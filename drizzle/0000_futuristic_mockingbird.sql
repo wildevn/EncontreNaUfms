@@ -35,6 +35,7 @@ CREATE TABLE `Locales` (
 	`id` int AUTO_INCREMENT NOT NULL,
 	`name` varchar(255) NOT NULL,
 	`localization_link` varchar(255) NOT NULL,
+	`address` varchar(60) NOT NULL,
 	`about` text,
 	`observation` text,
 	`type` tinyint NOT NULL,
@@ -68,13 +69,13 @@ CREATE TABLE `Reviews` (
 --> statement-breakpoint
 CREATE TABLE `ScheduledHours` (
 	`localeId` int NOT NULL,
-	`sunday_hours` varchar(20),
-	`monday_hours` varchar(20),
-	`tuesday_hours` varchar(20),
-	`wednesday_hours` varchar(20),
-	`thursday_hours` varchar(20),
-	`friday_hours` varchar(20),
-	`saturday_hours` varchar(20),
+	`sundayHours` varchar(20),
+	`mondayHours` varchar(20),
+	`tuesdayHours` varchar(20),
+	`wednesdayHours` varchar(20),
+	`thursdayHours` varchar(20),
+	`fridayHours` varchar(20),
+	`saturdayHours` varchar(20),
 	`createdAt` date NOT NULL,
 	`updatedAt` date NOT NULL,
 	CONSTRAINT `ScheduledHours_localeId_unique` UNIQUE(`localeId`)
