@@ -14,6 +14,7 @@ export const Locales = mysqlTable("Locales", {
   id: int("id").notNull().autoincrement().primaryKey(),
   name: varchar("name", { length: 255 }).notNull(),
   localizationLink: varchar("localization_link", { length: 255 }).notNull(),
+  address: varchar("address", { length: 60 }).notNull(),
   about: text("about"),
   observation: text("observation"),
   type: tinyint("type").notNull(),
@@ -25,13 +26,13 @@ export const Locales = mysqlTable("Locales", {
 
 export const ScheduledHours = mysqlTable("ScheduledHours", {
   localeId: int("localeId").notNull().references(() => Locales.id, { onDelete: 'cascade', onUpdate: 'cascade' }).unique(), // TODO: verify the foreign key
-  sundayHours: varchar("sunday_hours", { length: 20 }),
-  mondayHours: varchar("monday_hours", { length: 20 }),
-  tuesdayHours: varchar("tuesday_hours", { length: 20 }),
-  wednesdayHours: varchar("wednesday_hours", { length: 20 }),
-  thursdayHours: varchar("thursday_hours", { length: 20 }),
-  fridayHours: varchar("friday_hours", { length: 20 }),
-  saturdayHours: varchar("saturday_hours", { length: 20 }),
+  sundayHours: varchar("sundayHours", { length: 20 }),
+  mondayHours: varchar("mondayHours", { length: 20 }),
+  tuesdayHours: varchar("tuesdayHours", { length: 20 }),
+  wednesdayHours: varchar("wednesdayHours", { length: 20 }),
+  thursdayHours: varchar("thursdayHours", { length: 20 }),
+  fridayHours: varchar("fridayHours", { length: 20 }),
+  saturdayHours: varchar("saturdayHours", { length: 20 }),
   createdAt: date("createdAt").notNull(),
   updatedAt: date("updatedAt").notNull(),
 });
