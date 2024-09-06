@@ -1,7 +1,9 @@
 // Responsible to list the basic data to display on the list
 // TODO: Connect on DB, get all data and return
 import { db } from "@/db";
-import { Locales, Photos, ScheduledHours } from "@database/schema";
+import { Favorites, Locales, Photos, ScheduledHours } from "@database/schema";
+import { and } from "drizzle-orm";
+import { count, sql } from "drizzle-orm";
 import { eq } from "drizzle-orm";
 
 export type LocaleRow = {
@@ -15,6 +17,7 @@ export type LocaleRow = {
   } | null;
   type: number;
   isOpen?: boolean;
+  favorite: boolean | unknown;
 };
 
 export type ScheduledHoursRow = {
@@ -26,6 +29,16 @@ export type ScheduledHoursRow = {
   thursdayHours: string | null;
   fridayHours: string | null;
   saturdayHours: string | null;
+};
+
+type Data = {
+  locales: LocaleRow[];
+  totalItems: number;
+};
+
+type CountRow = {
+  count: number;
+  type?: number;
 };
 
 export const scheduleAttributes = [
@@ -61,41 +74,66 @@ export const isOpenned = (scheduleRow: ScheduledHoursRow): number => {
   }
   return 0;
 };
-
-const showLocalesService = async (category?: number) => {
+// pagenumber, limit....count
+/// default photo
+const showLocalesService = async (
+  pageNumber: number,
+  limit: number,
+  category?: number,
+  userId?: number,
+): Promise<Data> => {
   const dbConnection = await db();
-  const localeRows: LocaleRow[] = category
-    ? await dbConnection
-        .select({
-          id: Locales.id,
-          name: Locales.name,
-          address: Locales.address,
-          mainPhoto: {
-            id: Photos.id,
-            name: Photos.name,
-            data: Photos.data,
-          },
-          type: Locales.type,
-        })
-        .from(Locales)
-        .leftJoin(Photos, eq(Locales.id, Photos.localeId))
-        .where(eq(Locales.type, category))
-    : await dbConnection
-        .select({
-          id: Locales.id,
-          name: Locales.name,
-          address: Locales.address,
-          mainPhoto: {
-            id: Photos.id,
-            name: Photos.name,
-            data: Photos.data,
-          },
-          type: Locales.type,
-        })
-        .from(Locales)
-        .leftJoin(Photos, eq(Locales.id, Photos.localeId));
-
-  // console.log(localeRows);
+  const locales: LocaleRow[] =
+    category !== undefined && category >= 0
+      ? await dbConnection
+          .select({
+            id: Locales.id,
+            name: Locales.name,
+            address: Locales.address,
+            mainPhoto: {
+              id: Photos.id,
+              name: Photos.name,
+              data: Photos.data,
+            },
+            type: Locales.type,
+            favorite: sql`CASE WHEN ${Favorites.localeId} = ${Locales.id} AND ${Favorites.userId} = ${userId ? userId : 0} THEN true ELSE false END`,
+          })
+          .from(Locales)
+          .leftJoin(Photos, eq(Locales.id, Photos.localeId))
+          .leftJoin(
+            Favorites,
+            and(
+              eq(Favorites.localeId, Locales.id),
+              eq(Favorites.userId, userId ? userId : 0),
+            ),
+          )
+          .where(eq(Locales.type, category))
+          .limit(limit)
+          .offset(limit * (pageNumber - 1))
+      : await dbConnection
+          .select({
+            id: Locales.id,
+            name: Locales.name,
+            address: Locales.address,
+            mainPhoto: {
+              id: Photos.id,
+              name: Photos.name,
+              data: Photos.data,
+            },
+            type: Locales.type,
+            favorite: sql`CASE WHEN ${Favorites.localeId} = ${Locales.id} AND ${Favorites.userId} = ${userId ? userId : 0} THEN true ELSE false END`,
+          })
+          .from(Locales)
+          .leftJoin(Photos, eq(Locales.id, Photos.localeId))
+          .leftJoin(
+            Favorites,
+            and(
+              eq(Favorites.localeId, Locales.id),
+              eq(Favorites.userId, userId ? userId : 0),
+            ),
+          )
+          .limit(limit)
+          .offset(limit * (pageNumber - 1));
 
   const scheduleRows: ScheduledHoursRow[] = await dbConnection
     .select({
@@ -115,16 +153,29 @@ const showLocalesService = async (category?: number) => {
     const isOpen = schedules ? isOpenned(schedules) : -1;
 
     if (isOpen === 1 || isOpen === 0) {
-      const index = localeRows.findIndex(
+      const index = locales.findIndex(
         (locale) => locale.id === schedules.localeId,
       );
       if (index !== -1) {
-        localeRows[index].isOpen = isOpen === 1;
+        locales[index].isOpen = isOpen === 1;
       }
     }
   }
 
-  return localeRows;
+  const totalItems: number =
+    category !== undefined && category >= 0
+      ? (
+          await dbConnection
+            .select({ count: count(), type: Locales.type })
+            .from(Locales)
+            .where(eq(Locales.type, category))
+        )[0].count
+      : (await dbConnection.select({ count: count() }).from(Locales))[0].count;
+
+  return {
+    locales,
+    totalItems,
+  };
 };
 
 export default showLocalesService;
