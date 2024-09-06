@@ -2,7 +2,7 @@ import { mysqlTable, text, int, date, varchar, tinyint, decimal, mediumtext } fr
 
 export const Users = mysqlTable('Users', {
   id: int('id').notNull().autoincrement().primaryKey(),
-  name: varchar('name', { length: 255 }).notNull(),
+  name: varchar('name', { length: 255 }),
   email: varchar('email', { length: 255 }).notNull(),
   password: varchar('password', { length: 255 }).notNull(),
   createdAt: date('createdAt').notNull(),
@@ -46,14 +46,14 @@ export const Photos = mysqlTable("Photos", {
 })
 
 export const Favorites = mysqlTable("Favorites", {
-  id: int("id").notNull(),
+  userId: int("userId").notNull(),
   localeId: int("localeId").notNull().references(() => Locales.id, { onDelete: 'cascade', onUpdate: 'cascade' }).unique(),
   createdAt: date("createdAt").notNull(),
   updatedAt: date("updatedAt").notNull(),
 })
 
 export const Histories = mysqlTable("Histories", {
-  id: int("id").notNull(),
+  userId: int("userId").notNull(),
   localeId: int("localeId").notNull().references(() => Locales.id, { onDelete: 'cascade', onUpdate: 'cascade' }).unique(),
   createdAt: date("createdAt").notNull(),
   updatedAt: date("updatedAt").notNull(),

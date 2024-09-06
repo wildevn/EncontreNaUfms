@@ -4,7 +4,7 @@
 -- Creating tables
 CREATE TABLE `Users` (
     `id` int NOT NULL AUTO_INCREMENT PRIMARY KEY,
-    `name` varchar(255) NOT NULL,
+    `name` varchar(255),
     `email` varchar(255) NOT NULL,
     `password` varchar(255) NOT NULL,
     `createdAt` datetime NOT NULL,

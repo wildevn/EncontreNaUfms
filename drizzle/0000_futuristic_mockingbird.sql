@@ -7,7 +7,7 @@ CREATE TABLE `AcademicBlocks` (
 );
 --> statement-breakpoint
 CREATE TABLE `Favorites` (
-	`id` int NOT NULL,
+	`userId` int NOT NULL,
 	`localeId` int NOT NULL,
 	`createdAt` date NOT NULL,
 	`updatedAt` date NOT NULL,
@@ -15,7 +15,7 @@ CREATE TABLE `Favorites` (
 );
 --> statement-breakpoint
 CREATE TABLE `Histories` (
-	`id` int NOT NULL,
+	`userId` int NOT NULL,
 	`localeId` int NOT NULL,
 	`createdAt` date NOT NULL,
 	`updatedAt` date NOT NULL,
@@ -101,7 +101,7 @@ CREATE TABLE `Transports` (
 --> statement-breakpoint
 CREATE TABLE `Users` (
 	`id` int AUTO_INCREMENT NOT NULL,
-	`name` varchar(255) NOT NULL,
+	`name` varchar(255),
 	`email` varchar(255) NOT NULL,
 	`password` varchar(255) NOT NULL,
 	`createdAt` date NOT NULL,

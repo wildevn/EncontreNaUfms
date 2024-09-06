@@ -65,8 +65,8 @@
     "Favorites": {
       "name": "Favorites",
       "columns": {
-        "id": {
-          "name": "id",
+        "userId": {
+          "name": "userId",
           "type": "int",
           "primaryKey": false,
           "notNull": true,
@@ -123,8 +123,8 @@
     "Histories": {
       "name": "Histories",
       "columns": {
-        "id": {
-          "name": "id",
+        "userId": {
+          "name": "userId",
           "type": "int",
           "primaryKey": false,
           "notNull": true,
@@ -737,7 +737,7 @@
           "name": "name",
           "type": "varchar(255)",
           "primaryKey": false,
-          "notNull": true,
+          "notNull": false,
           "autoincrement": false
         },
         "email": {
