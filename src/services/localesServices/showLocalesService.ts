@@ -19,6 +19,7 @@ export type LocaleRow = {
   type: number;
   isOpen?: boolean;
   favorite: number | unknown;
+  grade: number | string;
 };
 
 export type ScheduledHoursRow = {
@@ -149,6 +150,7 @@ const showLocalesService = async (
           },
           type: Locales.type,
           favorite: sql`CASE WHEN ${Favorites.localeId} = ${Locales.id} AND ${Favorites.userId} = ${userId} THEN true ELSE false END`,
+          grade: Locales.grade,
         })
         .from(Locales)
         .leftJoin(Photos, eq(Locales.id, Photos.localeId))
@@ -171,6 +173,7 @@ const showLocalesService = async (
           },
           type: Locales.type,
           favorite: sql`CASE WHEN ${Favorites.localeId} = ${Locales.id} AND ${Favorites.userId} = ${userId} THEN true ELSE false END`,
+          grade: Locales.grade,
         })
         .from(Locales)
         .leftJoin(Photos, eq(Locales.id, Photos.localeId))

@@ -302,6 +302,14 @@
           "notNull": false,
           "autoincrement": false
         },
+        "grade": {
+          "name": "grade",
+          "type": "decimal",
+          "primaryKey": false,
+          "notNull": true,
+          "autoincrement": false,
+          "default": "'0.0'"
+        },
         "createdAt": {
           "name": "createdAt",
           "type": "date",
