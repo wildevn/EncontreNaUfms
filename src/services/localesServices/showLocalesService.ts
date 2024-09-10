@@ -2,6 +2,7 @@
 // TODO: Connect on DB, get all data and return
 import { db } from "@/db";
 import { Favorites, Locales, Photos, ScheduledHours } from "@database/schema";
+import { inArray } from "drizzle-orm";
 import { and } from "drizzle-orm";
 import { count, sql } from "drizzle-orm";
 import { eq } from "drizzle-orm";
@@ -17,7 +18,7 @@ export type LocaleRow = {
   } | null;
   type: number;
   isOpen?: boolean;
-  favorite: boolean | unknown;
+  favorite: number | unknown;
 };
 
 export type ScheduledHoursRow = {
@@ -31,9 +32,13 @@ export type ScheduledHoursRow = {
   saturdayHours: string | null;
 };
 
-type Data = {
+export type Data = {
   locales: LocaleRow[];
   totalItems: number;
+};
+
+export type LocaleError = {
+  error: string;
 };
 
 type CountRow = {
@@ -49,6 +54,19 @@ export const scheduleAttributes = [
   "thursdayHours",
   "fridayHours",
   "saturdayHours",
+];
+
+const LocaleTypes: Array<string> = [
+  "academicblocks", // 0
+  "touristspoints", // 1
+  "banks", // 2
+  "restaurants", // 3
+  "healthservices", // 4
+  "libraries", // 5
+  "sportscenters", // 6
+  "transports", // 7
+  "parkinglots", // 8
+  "generalbuildings", // 9
 ];
 
 const reduceHours = (array: string[]): number => {
@@ -74,66 +92,94 @@ export const isOpenned = (scheduleRow: ScheduledHoursRow): number => {
   }
   return 0;
 };
-// pagenumber, limit....count
+const categoryVerifier = (
+  categoryList: Array<string> | Array<number>,
+): Array<number> | string => {
+  if (Array.isArray(categoryList) && categoryList.length > 0) {
+    if (categoryList.every((category) => typeof category === "string")) {
+      const categories: Array<number> = [];
+      for (const category of categoryList) {
+        const number: number | typeof NaN = Number.parseInt(category.trim());
+        console.log("number", number, "!isNaN", !Number.isNaN(number));
+        if (!Number.isNaN(number)) {
+          categories.push(number);
+        } else {
+          const index = LocaleTypes.indexOf(category.trim().toLowerCase());
+
+          if (index !== -1) {
+            categories.push(index);
+          } else {
+            return `category: ${category.trim()} not found`;
+          }
+        }
+      }
+      return categories;
+    }
+  }
+  return "";
+};
+
 /// default photo
 const showLocalesService = async (
   pageNumber: number,
   limit: number,
-  category?: number,
-  userId?: number,
-): Promise<Data> => {
+  userId: number,
+  categoryList: Array<string>,
+): Promise<Data | LocaleError> => {
   const dbConnection = await db();
-  const locales: LocaleRow[] =
-    category !== undefined && category >= 0
-      ? await dbConnection
-          .select({
-            id: Locales.id,
-            name: Locales.name,
-            address: Locales.address,
-            mainPhoto: {
-              id: Photos.id,
-              name: Photos.name,
-              data: Photos.data,
-            },
-            type: Locales.type,
-            favorite: sql`CASE WHEN ${Favorites.localeId} = ${Locales.id} AND ${Favorites.userId} = ${userId ? userId : 0} THEN true ELSE false END`,
-          })
-          .from(Locales)
-          .leftJoin(Photos, eq(Locales.id, Photos.localeId))
-          .leftJoin(
-            Favorites,
-            and(
-              eq(Favorites.localeId, Locales.id),
-              eq(Favorites.userId, userId ? userId : 0),
-            ),
-          )
-          .where(eq(Locales.type, category))
-          .limit(limit)
-          .offset(limit * (pageNumber - 1))
-      : await dbConnection
-          .select({
-            id: Locales.id,
-            name: Locales.name,
-            address: Locales.address,
-            mainPhoto: {
-              id: Photos.id,
-              name: Photos.name,
-              data: Photos.data,
-            },
-            type: Locales.type,
-            favorite: sql`CASE WHEN ${Favorites.localeId} = ${Locales.id} AND ${Favorites.userId} = ${userId ? userId : 0} THEN true ELSE false END`,
-          })
-          .from(Locales)
-          .leftJoin(Photos, eq(Locales.id, Photos.localeId))
-          .leftJoin(
-            Favorites,
-            and(
-              eq(Favorites.localeId, Locales.id),
-              eq(Favorites.userId, userId ? userId : 0),
-            ),
-          )
-          .limit(limit)
-          .offset(limit * (pageNumber - 1));
+  const categories = categoryVerifier(categoryList);
+  if (pageNumber < 1 || limit < 1) {
+    return { error: "pageNumber and / or limit must be greater than 0" };
+  }
+
+  if (!Array.isArray(categories) && categories.includes("not found")) {
+    return { error: categories };
+  }
+
+  const locales: LocaleRow[] = Array.isArray(categories)
+    ? await dbConnection
+        .select({
+          id: Locales.id,
+          name: Locales.name,
+          address: Locales.address,
+          mainPhoto: {
+            id: Photos.id,
+            name: Photos.name,
+            data: Photos.data,
+          },
+          type: Locales.type,
+          favorite: sql`CASE WHEN ${Favorites.localeId} = ${Locales.id} AND ${Favorites.userId} = ${userId} THEN true ELSE false END`,
+        })
+        .from(Locales)
+        .leftJoin(Photos, eq(Locales.id, Photos.localeId))
+        .leftJoin(
+          Favorites,
+          and(eq(Favorites.localeId, Locales.id), eq(Favorites.userId, userId)),
+        )
+        .where(inArray(Locales.type, categories))
+        .limit(limit)
+        .offset(limit * (pageNumber - 1))
+    : await dbConnection
+        .select({
+          id: Locales.id,
+          name: Locales.name,
+          address: Locales.address,
+          mainPhoto: {
+            id: Photos.id,
+            name: Photos.name,
+            data: Photos.data,
+          },
+          type: Locales.type,
+          favorite: sql`CASE WHEN ${Favorites.localeId} = ${Locales.id} AND ${Favorites.userId} = ${userId} THEN true ELSE false END`,
+        })
+        .from(Locales)
+        .leftJoin(Photos, eq(Locales.id, Photos.localeId))
+        .leftJoin(
+          Favorites,
+          and(eq(Favorites.localeId, Locales.id), eq(Favorites.userId, userId)),
+        )
+        .limit(limit)
+        .offset(limit * (pageNumber - 1));
 
   const scheduleRows: ScheduledHoursRow[] = await dbConnection
     .select({
@@ -162,15 +208,14 @@ const showLocalesService = async (
     }
   }
 
-  const totalItems: number =
-    category !== undefined && category >= 0
-      ? (
-          await dbConnection
-            .select({ count: count(), type: Locales.type })
-            .from(Locales)
-            .where(eq(Locales.type, category))
-        )[0].count
-      : (await dbConnection.select({ count: count() }).from(Locales))[0].count;
+  const totalItems: number = Array.isArray(categories)
+    ? (
+        await dbConnection
+          .select({ count: count() })
+          .from(Locales)
+          .where(inArray(Locales.type, categories))
+      )[0].count
+    : (await dbConnection.select({ count: count() }).from(Locales))[0].count;
 
   return {
     locales,

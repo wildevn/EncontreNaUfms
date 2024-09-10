@@ -1,22 +1,17 @@
 import showLocalesService from "@/services/localesServices/showLocalesService";
+import type {
+  Data,
+  LocaleError,
+} from "@services/localesServices/showLocalesService";
 import listSectionService from "@services/localesServices/listSectionService";
 import type {
-  FastifyBaseLogger,
   FastifyReply,
   FastifyRequest,
-  FastifyTypeProviderDefault,
-  RawServerDefault,
-  RouteGenericInterface,
   RouteShorthandOptions,
 } from "fastify";
-import type { IncomingMessage, ServerResponse } from "node:http";
 
-type AllLocalesRequest = FastifyRequest<{
-  Querystring: { pageNumber: string; limit: string; userId: string };
-}>;
-
-type CategoryRequest = FastifyRequest<{
-  Params: { category: string };
+type ListLocalesRequest = FastifyRequest<{
+  Params: { categoryList: string };
   Querystring: { pageNumber: string; limit: string; userId: string };
 }>;
 
@@ -25,19 +20,18 @@ type SectionRequest = FastifyRequest<{
   Querystring: { sectionName: string };
 }>;
 
-export const listAllOpts: RouteShorthandOptions<
-  RawServerDefault,
-  IncomingMessage,
-  ServerResponse<IncomingMessage>,
-  RouteGenericInterface,
-  unknown,
-  FastifySchema,
-  FastifyTypeProviderDefault,
-  FastifyBaseLogger
-> = {
+export const listOpts: RouteShorthandOptions = {
   schema: {
+    params: {
+      type: "object",
+      required: ["categoryList"],
+      properties: {
+        category: { type: "string" },
+      },
+    },
     querystring: {
       type: "object",
+      required: ["pageNumber", "limit", "userId"],
       properties: {
         pageNumber: { type: "string" },
         limit: { type: "string" },
@@ -47,45 +41,9 @@ export const listAllOpts: RouteShorthandOptions<
   },
 };
 
-export const listCategoryOpts: RouteShorthandOptions<
-  RawServerDefault,
-  IncomingMessage,
-  ServerResponse<IncomingMessage>,
-  RouteGenericInterface,
-  unknown,
-  FastifySchema,
-  FastifyTypeProviderDefault,
-  FastifyBaseLogger
-> = {
+export const listSectionOpts: RouteShorthandOptions = {
   schema: {
-    request: {
-      type: "object",
-      properties: {
-        category: { type: "string" },
-      },
-    },
-    querystring: {
-      type: "object",
-      properties: {
-        pageNumber: { type: "string" },
-        limit: { type: "string" },
-      },
-    },
-  },
-};
-
-export const listSectionOpts: RouteShorthandOptions<
-  RawServerDefault,
-  IncomingMessage,
-  ServerResponse<IncomingMessage>,
-  RouteGenericInterface,
-  unknown,
-  FastifySchema,
-  FastifyTypeProviderDefault,
-  FastifyBaseLogger
-> = {
-  schema: {
-    request: {
+    params: {
       type: "object",
       properties: {
         localeId: { type: "string" },
@@ -100,30 +58,33 @@ export const listSectionOpts: RouteShorthandOptions<
   },
 };
 
-const showAll = async (request: AllLocalesRequest, reply: FastifyReply) => {
+// continuar a função, finalizando
+const list = async (request: ListLocalesRequest, reply: FastifyReply) => {
+  const { categoryList } = request.params;
   const { pageNumber, limit, userId } = request.query;
 
-  const locales = await showLocalesService(
-    Number.parseInt(pageNumber ? pageNumber : "1"),
-    Number.parseInt(limit ? limit : "10"),
-    Number.parseInt(userId),
-  );
+  if (pageNumber && limit && userId) {
+    const parsedCategoryList: Array<string> =
+      categoryList !== "" && categoryList.includes(",")
+        ? categoryList.split(",")
+        : categoryList === ""
+          ? []
+          : [categoryList];
 
-  reply.send({ data: locales });
-};
-
-const listCategory = async (request: CategoryRequest, reply: FastifyReply) => {
-  const { category } = request.params;
-  const { pageNumber, limit, userId } = request.query;
-
-  const locales = await showLocalesService(
-    Number.parseInt(pageNumber ? pageNumber : "1"),
-    Number.parseInt(limit ? limit : "10"),
-    Number.parseInt(category ? category : "-1"),
-    Number.parseInt(userId),
-  );
-
-  reply.send({ data: locales });
+    const data: Data | LocaleError = await showLocalesService(
+      Number.parseInt(pageNumber),
+      Number.parseInt(limit),
+      Number.parseInt(userId),
+      parsedCategoryList,
+    );
+    if ("error" in data) {
+      return reply.status(400).send({ error: { message: data.error } });
+    }
+    return reply.status(200).send({ data });
+  }
+  const message: string = `Check parameter(s): ${pageNumber ? "" : "pageNumber,"} 
+                            ${limit ? "" : "limit,"} ${userId ? "" : "userId"}`;
+  return reply.status(400).send({ error: { message } });
 };
 
 const listSection = async (request: SectionRequest, reply: FastifyReply) => {
@@ -132,7 +93,7 @@ const listSection = async (request: SectionRequest, reply: FastifyReply) => {
 
   const sectionInfo = await listSectionService(localeId, sectionName);
 
-  reply.send({ data: sectionInfo });
+  return reply.status(200).send({ data: sectionInfo });
 };
 
-export default { showAll, listCategory, listSection };
+export default { list, listSection };

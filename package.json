@@ -5,7 +5,7 @@
   "main": "index.js",
   "scripts": {
     "dev": "tsx watch src/server.ts",
-    "test": "echo \"Error: no test specified\" && exit 1",
+    "build": "tsup src",
     "migration": "drizzle-kit generate",
     "drizzle": "tsx ./database/index.ts"
   },
@@ -27,7 +27,8 @@
     "fastify": "^4.28.1",
     "module-alias": "^2.2.3",
     "mysql2": "^3.11.0",
-    "ts-node": "^10.9.2"
+    "ts-node": "^10.9.2",
+    "tsup": "^8.2.4"
   },
   "devDependencies": {
     "@types/node": "^22.5.1",
