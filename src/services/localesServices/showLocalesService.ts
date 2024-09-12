@@ -2,10 +2,7 @@
 // TODO: Connect on DB, get all data and return
 import { db } from "@/db";
 import { Favorites, Locales, Photos, ScheduledHours } from "@database/schema";
-import { inArray } from "drizzle-orm";
-import { and } from "drizzle-orm";
-import { count, sql } from "drizzle-orm";
-import { eq } from "drizzle-orm";
+import { sql, inArray, and, count, eq } from "drizzle-orm";
 
 export type LocaleRow = {
   id: number;
