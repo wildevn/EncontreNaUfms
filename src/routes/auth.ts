@@ -15,11 +15,7 @@ const auth = async (app: FastifyInstance, options: FastifyPluginOptions) => {
     registerOpts,
     authController.register,
   );
-  app.post<RefreshRequest>(
-    "/auth/refresh",
-    refreshOpts,
-    authController.refresh,
-  );
+  app.get<RefreshRequest>("/auth/refresh", refreshOpts, authController.refresh);
 };
 
 export default auth;
