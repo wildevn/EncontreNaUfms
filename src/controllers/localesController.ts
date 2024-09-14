@@ -10,15 +10,15 @@ import type {
   RouteShorthandOptions,
 } from "fastify";
 
-type ListLocalesRequest = FastifyRequest<{
+export type ListLocalesRequest = {
   Params: { categoryList: string };
   Querystring: { pageNumber: string; limit: string; userId: string };
-}>;
+};
 
-type SectionRequest = FastifyRequest<{
+export type SectionRequest = {
   Params: { localeId: string };
   Querystring: { sectionName: string };
-}>;
+};
 
 export const listOpts: RouteShorthandOptions = {
   schema: {
@@ -59,7 +59,10 @@ export const listSectionOpts: RouteShorthandOptions = {
 };
 
 // continuar a função, finalizando
-const list = async (request: ListLocalesRequest, reply: FastifyReply) => {
+const list = async (
+  request: FastifyRequest<ListLocalesRequest>,
+  reply: FastifyReply,
+) => {
   const { categoryList } = request.params;
   const { pageNumber, limit, userId } = request.query;
 
@@ -87,7 +90,10 @@ const list = async (request: ListLocalesRequest, reply: FastifyReply) => {
   return reply.status(400).send({ error: { message } });
 };
 
-const listSection = async (request: SectionRequest, reply: FastifyReply) => {
+const listSection = async (
+  request: FastifyRequest<SectionRequest>,
+  reply: FastifyReply,
+) => {
   const { localeId } = request.params;
   const { sectionName } = request.query;
 

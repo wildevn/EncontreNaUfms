@@ -2,15 +2,17 @@ import type { FastifyInstance, FastifyPluginOptions } from "fastify";
 import usersController, {
   createOrEditOpts,
   userInfoOpts,
+  type CreateOrEditRequest,
+  type InfoRequest,
 } from "@controllers/usersController";
 
 const users = async (app: FastifyInstance, options: FastifyPluginOptions) => {
-  app.post(
+  app.post<CreateOrEditRequest>(
     "/users/createOrEdit",
     createOrEditOpts,
     usersController.createOrEdit,
   );
-  app.get("/users/:userId", userInfoOpts, usersController.info);
+  app.get<InfoRequest>("/users/:userId", userInfoOpts, usersController.info);
   // app.post("/users/login", usersController.login);
 };
 
