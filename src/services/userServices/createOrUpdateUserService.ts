@@ -4,15 +4,18 @@ import { db } from "@/db";
 import { Users } from "@database/schema";
 import { eq } from "drizzle-orm";
 import bcrypt from "bcrypt";
+import createTokens from "@/helpers/createTokens";
 
 export type User = {
   name: string;
   email: string;
   id?: number;
+  token?: string;
+  refreshToken?: string;
 };
 
 export type UserReply = {
-  data?: User;
+  user?: User;
   error?: string;
   status: number;
 };
@@ -82,11 +85,15 @@ const createOrUpdateUserService = async (
 
     if (result?.info) {
       if (result.info.includes("Changed: 1")) {
+        const tokens = createTokens({ id: userId, name, email });
+
         return {
-          data: {
+          user: {
             id: userId,
             name,
             email,
+            token: tokens.accessToken,
+            refreshToken: tokens.refreshToken,
           },
           status: 200,
         };
@@ -122,11 +129,14 @@ const createOrUpdateUserService = async (
   if (!newUser) {
     return { error: `User not created: ${newUser}`, status: 400 };
   }
+  const tokens = createTokens({ id: newUser.id, name, email });
   return {
-    data: {
+    user: {
       id: newUser.id,
       name,
       email,
+      token: tokens.accessToken,
+      refreshToken: tokens.refreshToken,
     },
     status: 201,
   };

@@ -1,3 +1,4 @@
+import isAuth from "@/middlewares/isAuth";
 import createOrUpdateUserService, {
   type UserReply,
   type User,
@@ -9,22 +10,21 @@ import type {
   FastifyRequest,
   RouteShorthandOptions,
 } from "fastify";
-import authenticateToken from "@/middlewares/authenticateTocken";
 
-export type CreateOrEditRequest = FastifyRequest<{
+export type CreateOrEditRequest = {
   Body: {
     name: string;
     email: string;
     password: string;
     userId?: number;
   };
-}>;
+};
 
-export type InfoRequest = FastifyRequest<{
+export type InfoRequest = {
   Params: {
     userId: string;
   };
-}>;
+};
 
 export const createOrEditOpts: RouteShorthandOptions = {
   schema: {
@@ -38,7 +38,18 @@ export const createOrEditOpts: RouteShorthandOptions = {
       },
     },
   },
-  // preHandler: authenticateToken,
+  preHandler: async (
+    request: FastifyRequest,
+    reply: FastifyReply,
+    done: (err?: Error) => void,
+  ) => {
+    const body: CreateOrEditRequest["Body"] =
+      request.body as CreateOrEditRequest["Body"];
+    if ("userId" in body) {
+      return await isAuth(request, reply, done);
+    }
+    done();
+  },
 };
 
 export const userInfoOpts: RouteShorthandOptions = {
@@ -51,11 +62,11 @@ export const userInfoOpts: RouteShorthandOptions = {
       },
     },
   },
-  // preHandler: authenticateToken,
+  preHandler: isAuth,
 };
 
 const createOrEdit = async (
-  request: CreateOrEditRequest,
+  request: FastifyRequest<CreateOrEditRequest>,
   reply: FastifyReply,
 ): Promise<User | ErrorType> => {
   const { name, email, password, userId } = request.body;
@@ -70,12 +81,11 @@ const createOrEdit = async (
   if ("error" in user) {
     return reply.status(user.status).send({ error: user.error });
   }
-
   return reply.status(user.status).send({ user: user.data });
 };
 
 const info = async (
-  request: InfoRequest,
+  request: FastifyRequest<InfoRequest>,
   reply: FastifyReply,
 ): Promise<User | ErrorType> => {
   const { userId } = request.params;
