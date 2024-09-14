@@ -1,5 +1,5 @@
 // Responsible to return user information
-import { db } from "@/db";
+import { db } from "@database/db";
 import { Users } from "@database/schema";
 import { eq } from "drizzle-orm";
 

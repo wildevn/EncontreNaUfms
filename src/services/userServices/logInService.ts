@@ -1,6 +1,6 @@
 // Responsible to search if the user is already regi
 
-import { db } from "@/db";
+import { db } from "@database/db";
 import { Users } from "@database/schema";
 import { eq } from "drizzle-orm";
 import bcrypt from "bcrypt";

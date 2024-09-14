@@ -1,6 +1,6 @@
 // Responsible to list the basic data to display on the list
 // TODO: Connect on DB, get all data and return
-import { db } from "@/db";
+import { db } from "@database/db";
 import { Favorites, Locales, Photos, ScheduledHours } from "@database/schema";
 import { sql, inArray, and, count, eq } from "drizzle-orm";
 

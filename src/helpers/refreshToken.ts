@@ -1,5 +1,5 @@
 import type { User } from "@/services/userServices/createOrUpdateUserService";
-import { db } from "@/db";
+import { db } from "@database/db";
 import { Users } from "@database/schema";
 import { eq } from "drizzle-orm";
 import { decode, sign, type JwtPayload } from "jsonwebtoken";
