@@ -11,22 +11,21 @@ import type {
   RouteShorthandOptions,
 } from "fastify";
 
-export type CreateOrEditRequest = {
+export type EditRequest = {
   Body: {
     name: string;
     email: string;
     password: string;
-    userId?: number;
   };
 };
 
 export type InfoRequest = {
   Params: {
-    userId: string;
+    email: string;
   };
 };
 
-export const createOrEditOpts: RouteShorthandOptions = {
+export const editOpts: RouteShorthandOptions = {
   schema: {
     body: {
       type: "object",
@@ -38,64 +37,53 @@ export const createOrEditOpts: RouteShorthandOptions = {
       },
     },
   },
-  preHandler: async (
-    request: FastifyRequest,
-    reply: FastifyReply,
-    done: (err?: Error) => void,
-  ) => {
-    const body: CreateOrEditRequest["Body"] =
-      request.body as CreateOrEditRequest["Body"];
-    if ("userId" in body) {
-      return await isAuth(request, reply, done);
-    }
-    done();
-  },
+  preHandler: isAuth,
 };
 
 export const userInfoOpts: RouteShorthandOptions = {
   schema: {
     params: {
       type: "object",
-      required: ["userId"],
+      required: ["email"],
       properties: {
-        userId: { type: "string" },
+        email: { type: "string" },
       },
     },
   },
   preHandler: isAuth,
 };
 
-const createOrEdit = async (
-  request: FastifyRequest<CreateOrEditRequest>,
+const edit = async (
+  request: FastifyRequest<EditRequest>,
   reply: FastifyReply,
 ): Promise<User | ErrorType> => {
-  const { name, email, password, userId } = request.body;
+  const { name, email, password } = request.body;
 
   const user: UserReply = await createOrUpdateUserService(
     name,
     email,
     password,
-    userId,
+    true,
   );
 
   if ("error" in user) {
     return reply.status(user.status).send({ error: user.error });
   }
-  return reply.status(user.status).send({ user: user.data });
+  return reply.status(user.status).send({ user: user.user });
 };
 
 const info = async (
   request: FastifyRequest<InfoRequest>,
   reply: FastifyReply,
 ): Promise<User | ErrorType> => {
-  const { userId } = request.params;
+  const { email } = request.params;
 
-  const user: UserReply = await getUserInfoService(Number.parseInt(userId));
+  const user: UserReply = await getUserInfoService(email);
 
   if ("error" in user) {
     return reply.status(user.status).send({ error: user.error });
   }
-  return reply.status(user.status).send({ user: user.data });
+  return reply.status(user.status).send({ user: user.user });
 };
 
-export default { createOrEdit, info };
+export default { edit, info };

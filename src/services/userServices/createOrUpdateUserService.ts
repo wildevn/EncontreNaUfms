@@ -40,33 +40,22 @@ const createOrUpdateUserService = async (
   name: string,
   email: string,
   password: string,
-  userId?: number,
+  editUser?: boolean,
 ): Promise<UserReply> => {
   const dbConnection = await db();
 
-  const user = userId
-    ? ((
-        await dbConnection
-          .select({
-            id: Users.id,
-            name: Users.name,
-            email: Users.email,
-          })
-          .from(Users)
-          .where(eq(Users.id, userId))
-      )[0] as User)
-    : ((
-        await dbConnection
-          .select({
-            id: Users.id,
-            name: Users.name,
-            email: Users.email,
-          })
-          .from(Users)
-          .where(eq(Users.email, email))
-      )[0] as User);
+  const user = (
+    await dbConnection
+      .select({
+        id: Users.id,
+        name: Users.name,
+        email: Users.email,
+      })
+      .from(Users)
+      .where(eq(Users.email, email))
+  )[0] as User;
 
-  if (userId) {
+  if (editUser) {
     if (!user) {
       return { error: "User not found", status: 404 };
     }
@@ -80,16 +69,16 @@ const createOrUpdateUserService = async (
       await dbConnection
         .update(Users)
         .set({ name, email, password: hashedPassword })
-        .where(eq(Users.id, userId))
+        .where(eq(Users.email, email))
     )[0];
 
     if (result?.info) {
       if (result.info.includes("Changed: 1")) {
-        const tokens = createTokens({ id: userId, name, email });
+        const tokens = createTokens({ id: user.id, name, email });
 
         return {
           user: {
-            id: userId,
+            id: user.id,
             name,
             email,
             token: tokens.accessToken,
