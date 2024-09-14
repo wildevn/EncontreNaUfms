@@ -10,11 +10,11 @@ type User = {
 };
 
 type UserReply = {
-  data?: User;
+  user?: User;
   error?: string;
   status: number;
 };
-const getUserInfoService = async (userId: number): Promise<UserReply> => {
+const getUserInfoService = async (email: string): Promise<UserReply> => {
   const dbConnection = await db();
   const user: User = (
     await dbConnection
@@ -24,12 +24,12 @@ const getUserInfoService = async (userId: number): Promise<UserReply> => {
         email: Users.email,
       })
       .from(Users)
-      .where(eq(Users.id, userId))
+      .where(eq(Users.email, email))
   )[0] as User;
   if (!user) {
     return { error: "User not found", status: 404 };
   }
-  return { data: user, status: 200 };
+  return { user: user, status: 200 };
 };
 
 export default getUserInfoService;
