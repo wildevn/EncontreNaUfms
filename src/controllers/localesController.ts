@@ -9,10 +9,12 @@ import type {
   FastifyRequest,
   RouteShorthandOptions,
 } from "fastify";
+import verifyToken from "@/helpers/verifyToken";
+import { decode } from "jsonwebtoken";
 
 export type ListLocalesRequest = {
   Params: { categoryList: string };
-  Querystring: { pageNumber: string; limit: string; userId: string };
+  Querystring: { pageNumber: string; limit: string };
 };
 
 export type SectionRequest = {
@@ -22,6 +24,12 @@ export type SectionRequest = {
 
 export const listOpts: RouteShorthandOptions = {
   schema: {
+    headers: {
+      type: "object",
+      properties: {
+        authorization: { type: "string" },
+      },
+    },
     params: {
       type: "object",
       required: ["categoryList"],
@@ -31,11 +39,10 @@ export const listOpts: RouteShorthandOptions = {
     },
     querystring: {
       type: "object",
-      required: ["pageNumber", "limit", "userId"],
+      required: ["pageNumber", "limit"],
       properties: {
         pageNumber: { type: "string" },
         limit: { type: "string" },
-        userId: { type: "string" },
       },
     },
   },
@@ -43,6 +50,12 @@ export const listOpts: RouteShorthandOptions = {
 
 export const listSectionOpts: RouteShorthandOptions = {
   schema: {
+    headers: {
+      type: "object",
+      properties: {
+        authorization: { type: "string" },
+      },
+    },
     params: {
       type: "object",
       properties: {
@@ -64,9 +77,31 @@ const list = async (
   reply: FastifyReply,
 ) => {
   const { categoryList } = request.params;
-  const { pageNumber, limit, userId } = request.query;
+  const { pageNumber, limit } = request.query;
+  let userId = 0;
 
-  if (pageNumber && limit && userId) {
+  if ("authorization" in request.headers) {
+    const { authorization } = request.headers;
+    if (authorization) {
+      const [_, token] = authorization.split(" ");
+      const isValid = verifyToken(token, "access");
+      if (isValid) {
+        try {
+          const decodedToken = decode(token);
+          if (
+            decodedToken &&
+            typeof decodedToken === "object" &&
+            "id" in decodedToken
+          ) {
+            userId = decodedToken.id;
+          }
+        } catch (error) {
+          userId = 0;
+        }
+      }
+    }
+  }
+  if (pageNumber && limit) {
     const parsedCategoryList: Array<string> =
       categoryList !== "" && categoryList.includes(",")
         ? categoryList.split(",")
@@ -77,7 +112,7 @@ const list = async (
     const data: Data | LocaleError = await showLocalesService(
       Number.parseInt(pageNumber),
       Number.parseInt(limit),
-      Number.parseInt(userId),
+      userId,
       parsedCategoryList,
     );
     if ("error" in data) {
@@ -86,7 +121,7 @@ const list = async (
     return reply.status(200).send({ data });
   }
   const message: string = `Check parameter(s): ${pageNumber ? "" : "pageNumber,"} 
-                            ${limit ? "" : "limit,"} ${userId ? "" : "userId"}`;
+                            ${limit ? "" : "limit"}`;
   return reply.status(400).send({ error: { message } });
 };
 
@@ -96,8 +131,31 @@ const listSection = async (
 ) => {
   const { localeId } = request.params;
   const { sectionName } = request.query;
+  let userId = 0;
 
-  const sectionInfo = await listSectionService(localeId, sectionName);
+  if ("authorization" in request.headers) {
+    const { authorization } = request.headers;
+    if (authorization) {
+      const [_, token] = authorization.split(" ");
+      const isValid = verifyToken(token, "access");
+      if (isValid) {
+        try {
+          const decodedToken = decode(token);
+          if (
+            decodedToken &&
+            typeof decodedToken === "object" &&
+            "id" in decodedToken
+          ) {
+            userId = decodedToken.id;
+          }
+        } catch (error) {
+          userId = 0;
+        }
+      }
+    }
+  }
+
+  const sectionInfo = await listSectionService(localeId, sectionName, userId);
 
   return reply.status(200).send({ data: sectionInfo });
 };
