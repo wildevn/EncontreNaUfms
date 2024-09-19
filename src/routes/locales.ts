@@ -5,6 +5,7 @@ import localesController, {
   type ListLocalesRequest,
   type SectionRequest,
 } from "@controllers/localesController";
+import favorites from "./favorites";
 
 const locales = async (app: FastifyInstance, options: FastifyPluginOptions) => {
   app.get<ListLocalesRequest>(
@@ -17,6 +18,7 @@ const locales = async (app: FastifyInstance, options: FastifyPluginOptions) => {
     listSectionOpts,
     localesController.listSection,
   );
+  app.register(favorites, { prefix: "/locales" });
 };
 
 export default locales;
