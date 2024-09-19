@@ -116,20 +116,17 @@ ALTER TABLE `Photos`
     ADD CONSTRAINT `Photos_ibfk_1` FOREIGN KEY (`localeId`) REFERENCES `Locales` (`id`) ON DELETE CASCADE ON UPDATE CASCADE;
 
 ALTER TABLE `Favorites`
-    ADD KEY `userId` (`userId`),
-    ADD KEY `localeId` (`localeId`),
+    ADD UNIQUE KEY (`userId`, `localeId`),
     ADD CONSTRAINT `Favorites_ibfk_1` FOREIGN KEY (`userId`) REFERENCES `Users` (`id`) ON DELETE CASCADE ON UPDATE CASCADE,
     ADD CONSTRAINT `Favorites_ibfk_2` FOREIGN KEY (`localeId`) REFERENCES `Locales` (`id`) ON DELETE CASCADE ON UPDATE CASCADE;
 
 ALTER TABLE `Histories`
-    ADD KEY `userId` (`userId`),
-    ADD KEY `localeId` (`localeId`),
+    ADD UNIQUE KEY (`userId`, `localeId`),
     ADD CONSTRAINT `Histories_ibfk_1` FOREIGN KEY (`userId`) REFERENCES `Users` (`id`) ON DELETE CASCADE ON UPDATE CASCADE,
     ADD CONSTRAINT `Histories_ibfk_2` FOREIGN KEY (`localeId`) REFERENCES `Locales` (`id`) ON DELETE CASCADE ON UPDATE CASCADE;
 
 ALTER TABLE `Reviews`
-    ADD KEY `userId` (`userId`),
-    ADD KEY `localeId` (`localeId`),
+    ADD UNIQUE KEY (`userId`, `localeId`),
     ADD CONSTRAINT `Reviews_ibfk_1` FOREIGN KEY (`userId`) REFERENCES `Users` (`id`) ON DELETE CASCADE ON UPDATE CASCADE,
     ADD CONSTRAINT `Reviews_ibfk_2` FOREIGN KEY (`localeId`) REFERENCES `Locales` (`id`) ON DELETE CASCADE ON UPDATE CASCADE;
 

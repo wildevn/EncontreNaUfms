@@ -11,7 +11,7 @@ CREATE TABLE `Favorites` (
 	`localeId` int NOT NULL,
 	`createdAt` date NOT NULL,
 	`updatedAt` date NOT NULL,
-	CONSTRAINT `Favorites_localeId_unique` UNIQUE(`localeId`)
+	CONSTRAINT `Favorites_unique` UNIQUE(`localeId`, `userId`)
 );
 --> statement-breakpoint
 CREATE TABLE `Histories` (
@@ -19,7 +19,7 @@ CREATE TABLE `Histories` (
 	`localeId` int NOT NULL,
 	`createdAt` date NOT NULL,
 	`updatedAt` date NOT NULL,
-	CONSTRAINT `Histories_localeId_unique` UNIQUE(`localeId`)
+	CONSTRAINT `Histories_unique` UNIQUE(`localeId`, `userId`)
 );
 --> statement-breakpoint
 CREATE TABLE `Libraries` (
@@ -64,8 +64,7 @@ CREATE TABLE `Reviews` (
 	`grade` decimal NOT NULL DEFAULT '0.0',
 	`createdAt` date NOT NULL,
 	`updatedAt` date NOT NULL,
-	CONSTRAINT `Reviews_userId_unique` UNIQUE(`userId`),
-	CONSTRAINT `Reviews_localeId_unique` UNIQUE(`localeId`)
+	CONSTRAINT `Reviews_unique` UNIQUE(`localeId`, `userId`)
 );
 --> statement-breakpoint
 CREATE TABLE `ScheduledHours` (
