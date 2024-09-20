@@ -84,6 +84,7 @@ const login = async (
 ): Promise<User | ErrorType> => {
   const { email, password } = request.body;
   const loggedUser: UserReply = await logInService(email, password);
+
   if ("error" in loggedUser) {
     return reply.status(loggedUser.status).send({ error: loggedUser.error });
   }
@@ -117,6 +118,7 @@ const refresh = async (
   if (!authorization) {
     return reply.status(400).send({ error: "No token provided" });
   }
+
   const [_, token] = authorization.split(" ");
   const isValid: boolean = verifyToken(token, "refresh");
 

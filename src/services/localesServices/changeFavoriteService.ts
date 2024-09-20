@@ -19,6 +19,7 @@ export type FavoriteReply = {
 };
 const changeFavoriteService = async (localeId: number, userId: number) => {
   const dbConnection = await db();
+  let result: ResultAction | undefined;
 
   try {
     const locale: Favorite = (
@@ -33,7 +34,6 @@ const changeFavoriteService = async (localeId: number, userId: number) => {
         )
     )[0] as Favorite;
 
-    let result: ResultAction | undefined;
     if (locale) {
       result = (
         await dbConnection
