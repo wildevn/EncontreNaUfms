@@ -54,10 +54,7 @@ const changeFavoriteService = async (localeId: number, userId: number) => {
       )[0] as ResultAction;
     }
     if (result) {
-      return {
-        result: "Favorite changed",
-        status: 200,
-      };
+      return { result: "Favorite changed", status: 200 };
     }
     return {
       error: "Favorite not changed due to internal server error",
