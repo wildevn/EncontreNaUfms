@@ -12,19 +12,6 @@ export type ChangeRequest = {
   Params: { localeId: string };
 };
 
-// export const listOtps: RouteShorthandOptions = {
-//   schema: {
-//     headers: {
-//       type: "object",
-//       required: ["authorization"],
-//       properties: {
-//         authorization: { type: "string" },
-//       },
-//     },
-//   },
-//   preHandler: isAuth,
-// };
-
 export const changeOtps: RouteShorthandOptions = {
   schema: {
     headers: {
@@ -43,8 +30,6 @@ export const changeOtps: RouteShorthandOptions = {
   },
   preHandler: isAuth,
 };
-
-// const list = async (request: FastifyRequest, reply: FastifyReply) => {};
 
 const change = async (
   request: FastifyRequest<ChangeRequest>,
