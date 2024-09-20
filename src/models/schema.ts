@@ -7,6 +7,7 @@ import {
   tinyint,
   decimal,
   mediumtext,
+  unique,
 } from "drizzle-orm/mysql-core";
 
 export const Users = mysqlTable("Users", {
@@ -61,45 +62,66 @@ export const Photos = mysqlTable("Photos", {
   updatedAt: date("updatedAt").notNull(),
 });
 
-export const Favorites = mysqlTable("Favorites", {
-  userId: int("userId")
-    .notNull()
-    .references(() => Users.id, { onDelete: "cascade", onUpdate: "cascade" })
-    .unique(),
-  localeId: int("localeId")
-    .notNull()
-    .references(() => Locales.id, { onDelete: "cascade", onUpdate: "cascade" })
-    .unique(),
-  createdAt: date("createdAt").notNull(),
-  updatedAt: date("updatedAt").notNull(),
-});
+export const Favorites = mysqlTable(
+  "Favorites",
+  {
+    userId: int("userId")
+      .notNull()
+      .references(() => Users.id, { onDelete: "cascade", onUpdate: "cascade" }),
+    localeId: int("localeId")
+      .notNull()
+      .references(() => Locales.id, {
+        onDelete: "cascade",
+        onUpdate: "cascade",
+      }),
+    createdAt: date("createdAt").notNull(),
+    updatedAt: date("updatedAt").notNull(),
+  },
+  (favorite) => ({
+    uniqueIdx: unique().on(favorite.userId, favorite.localeId),
+  }),
+);
 
-export const Histories = mysqlTable("Histories", {
-  userId: int("userId")
-    .notNull()
-    .references(() => Users.id, { onDelete: "cascade", onUpdate: "cascade" })
-    .unique(),
-  localeId: int("localeId")
-    .notNull()
-    .references(() => Locales.id, { onDelete: "cascade", onUpdate: "cascade" })
-    .unique(),
-  createdAt: date("createdAt").notNull(),
-  updatedAt: date("updatedAt").notNull(),
-});
+export const Histories = mysqlTable(
+  "Histories",
+  {
+    userId: int("userId")
+      .notNull()
+      .references(() => Users.id, { onDelete: "cascade", onUpdate: "cascade" }),
+    localeId: int("localeId")
+      .notNull()
+      .references(() => Locales.id, {
+        onDelete: "cascade",
+        onUpdate: "cascade",
+      }),
+    createdAt: date("createdAt").notNull(),
+    updatedAt: date("updatedAt").notNull(),
+  },
+  (history) => ({
+    uniqueIdx: unique().on(history.userId, history.localeId),
+  }),
+);
 
-export const Reviews = mysqlTable("Reviews", {
-  userId: int("userId")
-    .notNull()
-    .references(() => Users.id, { onDelete: "cascade", onUpdate: "cascade" })
-    .unique(),
-  localeId: int("localeId")
-    .notNull()
-    .references(() => Locales.id, { onDelete: "cascade", onUpdate: "cascade" })
-    .unique(),
-  grade: decimal("grade").notNull().default("0.0"),
-  createdAt: date("createdAt").notNull(),
-  updatedAt: date("updatedAt").notNull(),
-});
+export const Reviews = mysqlTable(
+  "Reviews",
+  {
+    userId: int("userId")
+      .notNull()
+      .references(() => Users.id, { onDelete: "cascade", onUpdate: "cascade" }),
+    localeId: int("localeId")
+      .notNull()
+      .references(() => Locales.id, {
+        onDelete: "cascade",
+        onUpdate: "cascade",
+      }),
+    grade: decimal("grade").notNull().default("0.0"),
+    createdAt: date("createdAt").notNull(),
+    updatedAt: date("updatedAt").notNull(),
+  },
+  (review) => ({
+    uniqueIdx: unique().on(review.userId, review.localeId),
+  }),
+);
 
 export const AcademicBlocks = mysqlTable("AcademicBlocks", {
   localeId: int("localeId")
