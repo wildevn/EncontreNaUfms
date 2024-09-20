@@ -28,6 +28,9 @@ const changeFavoriteService = async (localeId: number, userId: number) => {
           userId: Favorites.userId,
         })
         .from(Favorites)
+        .where(
+          and(eq(Favorites.localeId, localeId), eq(Favorites.userId, userId)),
+        )
     )[0] as Favorite;
 
     let result: ResultAction | undefined;
