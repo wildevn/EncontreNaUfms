@@ -9,8 +9,7 @@ import type {
   FastifyRequest,
   RouteShorthandOptions,
 } from "fastify";
-import verifyToken from "@/helpers/verifyToken";
-import { decode } from "jsonwebtoken";
+import decodeToken from "@/helpers/decodeToken";
 
 export type ListLocalesRequest = {
   Params: { categoryList: string };
@@ -80,27 +79,11 @@ const list = async (
   const { pageNumber, limit } = request.query;
   let userId = 0;
 
-  if ("authorization" in request.headers) {
+  if ("authorization" in request.headers && request.headers.authorization) {
     const { authorization } = request.headers;
-    if (authorization) {
-      const [_, token] = authorization.split(" ");
-      const isValid = verifyToken(token, "access");
-      if (isValid) {
-        try {
-          const decodedToken = decode(token);
-          if (
-            decodedToken &&
-            typeof decodedToken === "object" &&
-            "id" in decodedToken
-          ) {
-            userId = decodedToken.id;
-          }
-        } catch (error) {
-          userId = 0;
-        }
-      }
-    }
+    userId = decodeToken(authorization);
   }
+
   if (pageNumber && limit) {
     const parsedCategoryList: Array<string> =
       categoryList !== "" && categoryList.includes(",")
@@ -133,26 +116,9 @@ const listSection = async (
   const { sectionName } = request.query;
   let userId = 0;
 
-  if ("authorization" in request.headers) {
+  if ("authorization" in request.headers && request.headers.authorization) {
     const { authorization } = request.headers;
-    if (authorization) {
-      const [_, token] = authorization.split(" ");
-      const isValid = verifyToken(token, "access");
-      if (isValid) {
-        try {
-          const decodedToken = decode(token);
-          if (
-            decodedToken &&
-            typeof decodedToken === "object" &&
-            "id" in decodedToken
-          ) {
-            userId = decodedToken.id;
-          }
-        } catch (error) {
-          userId = 0;
-        }
-      }
-    }
+    userId = decodeToken(authorization);
   }
 
   const sectionInfo = await listSectionService(localeId, sectionName, userId);

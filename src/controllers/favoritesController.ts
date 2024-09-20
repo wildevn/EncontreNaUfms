@@ -1,4 +1,4 @@
-import verifyToken from "@/helpers/verifyToken";
+import decodeToken from "@/helpers/decodeToken";
 import isAuth from "@/middlewares/isAuth";
 import changeFavoriteService from "@/services/localesServices/changeFavoriteService";
 import type {
@@ -6,7 +6,6 @@ import type {
   FastifyRequest,
   RouteShorthandOptions,
 } from "fastify";
-import { decode } from "jsonwebtoken";
 
 export type ChangeRequest = {
   Params: { localeId: string };
@@ -38,27 +37,11 @@ const change = async (
   const { localeId } = request.params;
   let userId = 0;
 
-  if ("authorization" in request.headers) {
+  if ("authorization" in request.headers && request.headers.authorization) {
     const { authorization } = request.headers;
-    if (authorization) {
-      const [_, token] = authorization.split(" ");
-      const isValid = verifyToken(token, "access");
-      if (isValid) {
-        try {
-          const decodedToken = decode(token);
-          if (
-            decodedToken &&
-            typeof decodedToken === "object" &&
-            "id" in decodedToken
-          ) {
-            userId = decodedToken.id;
-          }
-        } catch (error) {
-          userId = 0;
-        }
-      }
-    }
+    userId = decodeToken(authorization);
   }
+
   const favoritedLocale = await changeFavoriteService(
     Number.parseInt(localeId),
     userId,
