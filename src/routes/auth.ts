@@ -2,10 +2,10 @@ import type { FastifyInstance, FastifyPluginOptions } from "fastify";
 import authController, {
   loginOpts,
   registerOpts,
-  refreshOpts,
+  tokenOpts,
   type AuthRequest,
   type RegisterRequest,
-  type RefreshRequest,
+  type TokenRequest,
 } from "@controllers/authController";
 
 const auth = async (app: FastifyInstance, options: FastifyPluginOptions) => {
@@ -15,7 +15,8 @@ const auth = async (app: FastifyInstance, options: FastifyPluginOptions) => {
     registerOpts,
     authController.register,
   );
-  app.get<RefreshRequest>("/auth/refresh", refreshOpts, authController.refresh);
+  app.get<TokenRequest>("/auth/refresh", tokenOpts, authController.refresh);
+  app.get<TokenRequest>("/auth/verify", tokenOpts, authController.verify);
 };
 
 export default auth;

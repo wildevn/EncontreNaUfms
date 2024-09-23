@@ -27,7 +27,7 @@ export type RegisterRequest = {
     password: string;
   };
 };
-export type RefreshRequest = {
+export type TokenRequest = {
   Headers: {
     authorization: string;
   };
@@ -64,7 +64,7 @@ export const registerOpts: RouteShorthandOptions = {
   },
 };
 
-export const refreshOpts: RouteShorthandOptions = {
+export const tokenOpts: RouteShorthandOptions = {
   schema: {
     headers: {
       type: "object",
@@ -76,6 +76,11 @@ export const refreshOpts: RouteShorthandOptions = {
       },
     },
   },
+};
+
+type VerifyResult = {
+  result?: string;
+  error?: string;
 };
 
 const login = async (
@@ -110,7 +115,7 @@ const register = async (
 };
 
 const refresh = async (
-  request: FastifyRequest<RefreshRequest>,
+  request: FastifyRequest<TokenRequest>,
   reply: FastifyReply,
 ): Promise<AccessToken | ErrorType> => {
   const { authorization } = request.headers;
@@ -136,4 +141,21 @@ const refresh = async (
   return reply.status(200).send({ ...newToken });
 };
 
-export default { login, register, refresh };
+const verify = async (
+  request: FastifyRequest,
+  reply: FastifyReply,
+): Promise<VerifyResult> => {
+  const { authorization } = request.headers;
+  if (!authorization) {
+    return reply.status(400).send({ error: "No token provided" });
+  }
+
+  const [_, token] = authorization.split(" ");
+  const isValid: boolean = verifyToken(token, "access");
+  if (!isValid) {
+    return reply.status(401).send({ error: "Invalid access token provided" });
+  }
+  return reply.status(200).send({ result: "valid token" });
+};
+
+export default { login, register, refresh, verify };
