@@ -41,7 +41,7 @@ CREATE TABLE `Locales` (
 	`type` tinyint NOT NULL,
 	`phone_number` varchar(11),
 	`accessibility` tinyint,
-	`grade` decimal(10, 2) NOT NULL DEFAULT '0.0',
+	`grade` decimal(10, 1) NOT NULL DEFAULT '0.0',
 	`createdAt` date NOT NULL,
 	`updatedAt` date NOT NULL,
 	CONSTRAINT `Locales_id` PRIMARY KEY(`id`)
