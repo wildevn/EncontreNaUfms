@@ -363,7 +363,7 @@
         },
         "data": {
           "name": "data",
-          "type": "mediumtext",
+          "type": "varbinary(65535)",
           "primaryKey": false,
           "notNull": true,
           "autoincrement": false

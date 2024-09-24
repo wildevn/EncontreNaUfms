@@ -6,8 +6,8 @@ import {
   varchar,
   tinyint,
   decimal,
-  mediumtext,
   unique,
+  varbinary,
 } from "drizzle-orm/mysql-core";
 
 export const Users = mysqlTable("Users", {
@@ -57,7 +57,7 @@ export const Photos = mysqlTable("Photos", {
     .references(() => Locales.id, { onDelete: "cascade", onUpdate: "cascade" })
     .unique(),
   name: varchar("name", { length: 255 }).notNull(),
-  data: mediumtext("data").notNull(),
+  data: varbinary("data", { length: 65535 }).notNull(),
   createdAt: date("createdAt").notNull(),
   updatedAt: date("updatedAt").notNull(),
 });
