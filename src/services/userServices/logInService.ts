@@ -48,7 +48,10 @@ const logInService = async (email: string, password: string) => {
     }
     return { error: "Invalid password", status: 401 };
   } catch (error) {
-    return { error: "Invalid password", status: 401 };
+    if (error instanceof Error) {
+      return { error: error.message, status: 500 };
+    }
+    return { error: "Unexpected error", status: 401 };
   }
 };
 
