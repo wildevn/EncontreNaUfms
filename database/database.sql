@@ -43,7 +43,7 @@ CREATE TABLE `Photos` (
     `id` int NOT NULL AUTO_INCREMENT PRIMARY KEY,
     `localeId` int NOT NULL,
     `name` varchar(255) NOT NULL,
-    `data` varbinary(65535) NOT NULL,
+    `data` varbinary(64200) NOT NULL,
     `createdAt` datetime NOT NULL,
     `updatedAt` datetime NOT NULL
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
