@@ -1,6 +1,8 @@
 import decodeToken from "@/helpers/decodeToken";
 import isAuth from "@/middlewares/isAuth";
 import createOrUpdateReviewService from "@/services/localesServices/createOrUpdateReviewService";
+import deleteReviewService from "@/services/localesServices/deleteReviewService";
+import getReviewService from "@/services/localesServices/getReviewService";
 import type {
   FastifyReply,
   FastifyRequest,
@@ -127,7 +129,9 @@ const createOrUpdate = async (
       }
       return reply.status(result.status).send({ result: result.result });
     }
-    // return antes
+    return reply
+      .status(401)
+      .send({ error: "Unauthorized, token not recognized or invalid User" });
   }
   return reply.status(401).send({ error: "Unauthorized" });
 };
@@ -141,8 +145,15 @@ const getReview = async (
     const { authorization } = request.headers;
     const userId = decodeToken(authorization);
     if (userId) {
+      const result = await getReviewService(Number.parseInt(localeId), userId);
+      if ("error" in result) {
+        return reply.status(result.status).send({ error: result.error });
+      }
+      return reply.status(result.status).send({ result: result.result });
     }
-    // return antes
+    return reply
+      .status(401)
+      .send({ error: "Unauthorized, token not recognized or invalid User" });
   }
   return reply.status(401).send({ error: "Unauthorized" });
 };
@@ -156,8 +167,19 @@ const deleteById = async (
     const { authorization } = request.headers;
     const userId = decodeToken(authorization);
     if (userId) {
+      const result = await deleteReviewService(
+        Number.parseInt(localeId),
+        userId,
+      );
+
+      if ("error" in result) {
+        return reply.status(result.status).send({ error: result.error });
+      }
+      return reply.status(result.status).send({ result: result.result });
     }
-    // return antes
+    return reply
+      .status(401)
+      .send({ error: "Unauthorized, token not recognized or invalid User" });
   }
   return reply.status(401).send({ error: "Unauthorized" });
 };

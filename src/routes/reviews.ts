@@ -10,17 +10,17 @@ import reviewsController, {
 
 const reviews = async (app: FastifyInstance, options: FastifyPluginOptions) => {
   app.post<CreateOrUpdateRequest>(
-    "/reviews/:localeId",
+    "/reviews/createOrUpdate/:localeId",
     createOrUpdateOtps,
     reviewsController.createOrUpdate,
   );
   app.get<GetReviewRequest>(
-    "/reviews/:localeId",
+    "/reviews/get/:localeId",
     getReviewOtps,
     reviewsController.getReview,
   );
   app.delete<DeleteByIdRequest>(
-    "/reviews/:localeId",
+    "/reviews/delete/:localeId",
     deleteByIdOtps,
     reviewsController.deleteById,
   );
