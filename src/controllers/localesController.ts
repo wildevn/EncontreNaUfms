@@ -121,7 +121,11 @@ const listSection = async (
     userId = decodeToken(authorization);
   }
 
-  const sectionInfo = await listSectionService(localeId, sectionName, userId);
+  const sectionInfo = await listSectionService(
+    Number.parseInt(localeId),
+    userId,
+    sectionName,
+  );
 
   return reply.status(200).send({ data: sectionInfo });
 };
