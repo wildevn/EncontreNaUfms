@@ -267,6 +267,20 @@
           "notNull": true,
           "autoincrement": false
         },
+        "latitude": {
+          "name": "latitude",
+          "type": "decimal",
+          "primaryKey": false,
+          "notNull": true,
+          "autoincrement": false
+        },
+        "longitude": {
+          "name": "longitude",
+          "type": "decimal",
+          "primaryKey": false,
+          "notNull": true,
+          "autoincrement": false
+        },
         "about": {
           "name": "about",
           "type": "text",

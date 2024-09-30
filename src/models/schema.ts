@@ -23,6 +23,8 @@ export const Locales = mysqlTable("Locales", {
   id: int("id").notNull().autoincrement().primaryKey(),
   name: varchar("name", { length: 255 }).notNull(),
   localizationLink: varchar("localization_link", { length: 255 }).notNull(),
+  latitude: decimal("latitude", { precision: 10, scale: 3 }).notNull(),
+  longitude: decimal("longitude", { precision: 10, scale: 3 }).notNull(),
   address: varchar("address", { length: 60 }).notNull(),
   about: text("about"),
   observation: text("observation"),
