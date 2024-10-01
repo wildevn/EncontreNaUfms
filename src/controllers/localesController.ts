@@ -18,7 +18,7 @@ export type ListLocalesRequest = {
 
 export type SectionRequest = {
   Params: { localeId: string };
-  Querystring: { sectionName: string };
+  Querystring: { sectionId: string };
 };
 
 export const listOpts: RouteShorthandOptions = {
@@ -57,14 +57,16 @@ export const listSectionOpts: RouteShorthandOptions = {
     },
     params: {
       type: "object",
+      required: ["localeId"],
       properties: {
         localeId: { type: "string" },
       },
     },
     querystring: {
       type: "object",
+      required: ["sectionId"],
       properties: {
-        sectionName: { type: "string" },
+        sectionId: { type: "string" },
       },
     },
   },
@@ -113,7 +115,7 @@ const listSection = async (
   reply: FastifyReply,
 ) => {
   const { localeId } = request.params;
-  const { sectionName } = request.query;
+  const { sectionId } = request.query;
   let userId = 0;
 
   if ("authorization" in request.headers && request.headers.authorization) {
@@ -124,10 +126,20 @@ const listSection = async (
   const sectionInfo = await listSectionService(
     Number.parseInt(localeId),
     userId,
-    sectionName,
+    sectionId,
   );
 
-  return reply.status(200).send({ data: sectionInfo });
+  if (sectionInfo) {
+    if ("error" in sectionInfo) {
+      return reply
+        .status(sectionInfo.status)
+        .send({ error: sectionInfo.error });
+    }
+    return reply.status(sectionInfo.status).send({ data: sectionInfo.result });
+  }
+  return reply
+    .status(500)
+    .send({ error: "Inernal Server Error, please try again" });
 };
 
 export default { list, listSection };

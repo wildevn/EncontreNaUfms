@@ -1,7 +1,46 @@
 import { db } from "@/models/db";
-import { Favorites, Locales, Photos } from "@/models/schema";
+import { Histories, Locales, ScheduledHours } from "@/models/schema";
 import { and } from "drizzle-orm";
 import { eq, sql } from "drizzle-orm";
+
+type Localization = {
+  id: number;
+  name: string;
+  address: string;
+  localizationLink: string;
+  latitude: number;
+  longitude: number;
+  accessibility: string;
+  photos: Array<{
+    id: number;
+    name: string;
+    data: string;
+  }>;
+  grade: number;
+  favorite: boolean;
+};
+
+type Hours = {
+  sundayHours: string;
+  mondayHours: string;
+  tuesdayHours: string;
+  wednesdayHours: string;
+  thursdayHours: string;
+  fridayHours: string;
+  saturdayHours: string;
+};
+
+type MoreInfo = {
+  about: string;
+  observation: string;
+  phoneNumber: string;
+};
+
+type ResultReply = {
+  result?: Localization | Hours | MoreInfo;
+  error?: string;
+  status: number;
+};
 
 const LocaleSections: Array<string> = [
   "localization", // 0
@@ -9,34 +48,26 @@ const LocaleSections: Array<string> = [
   "moreinfo", // 2
 ];
 
-// const subquery = db.select({
-//   localeId: photos.localeId,
-//   photoArray: sql`json_arrayagg(json_object('id', ${photos.id}, 'data', ${photos.data}))`
-// })
-// .from(photos)
-// .groupBy(photos.localeId)
-// .as('photoSubquery');
-
-// const result = await db.select({
-//   id: locales.id,
-//   name: locales.name,
-//   address: locales.address,
-//   photos: subquery.photoArray
-// })
-// .from(locales)
-// .leftJoin(subquery, eq(locales.id, subquery.localeId));
+const sectionVerifier = (sectionId: string): number => {
+  const number: number | typeof NaN = Number.parseInt(sectionId);
+  if (!Number.isNaN(number)) {
+    if (number >= 0 && number <= LocaleSections.length - 1) {
+      return number;
+    }
+  } else {
+    return LocaleSections.indexOf(sectionId.toLowerCase());
+  }
+  return -1;
+};
 
 const listSectionService = async (
   localeId: number,
   userId: number,
-  sectionId: number | string,
-) => {
-  let result: any;
+  sectionId: string,
+): Promise<ResultReply | undefined> => {
+  let result: Localization[] | Hours | MoreInfo | undefined;
   const dbConnection = await db();
-  const index: number =
-    typeof sectionId === "string"
-      ? LocaleSections.indexOf(sectionId.toLowerCase())
-      : sectionId;
+  const index: number = sectionVerifier(sectionId);
 
   if (index === -1) {
     return { error: "Section not found", status: 404 };
@@ -44,12 +75,54 @@ const listSectionService = async (
 
   try {
     if (index === 0) {
-      const subquery = await dbConnection.execute(sql`
+      if (userId > 0) {
+        const alreadyVisited: boolean =
+          (
+            await dbConnection
+              .select()
+              .from(Histories)
+              .where(
+                and(
+                  eq(Histories.userId, userId),
+                  eq(Histories.localeId, localeId),
+                ),
+              )
+          ).length === 1;
+        const date = new Date();
+        try {
+          if (alreadyVisited) {
+            await dbConnection
+              .update(Histories)
+              .set({ updatedAt: new Date() })
+              .where(
+                and(
+                  eq(Histories.userId, userId),
+                  eq(Histories.localeId, localeId),
+                ),
+              );
+          } else {
+            await dbConnection.insert(Histories).values({
+              userId,
+              localeId,
+              createdAt: date,
+              updatedAt: date,
+            });
+          }
+        } catch (error) {
+          // do nothing
+        }
+      }
+
+      result = (
+        await dbConnection.execute(sql`
         SELECT 
           locale.id,
           locale.name,
           locale.address,
           locale.localizationLink,
+          locale.latitude,
+          locale.longitude,
+          locale.accessibility,
           json_arrayagg(json_object('id', photo.id, 'name', photo.name, 'data', photo.data)) as photos,
           locale.grade,
           CASE WHEN favorite.localeId = locale.id AND favorite.userId = ${userId} THEN true ELSE false END as favorite
@@ -61,31 +134,40 @@ const listSectionService = async (
           Favorites AS favorite ON locale.id = favorite.localeId AND favorite.userId = ${userId}
         WHERE
           locale.id = ${localeId}
-        `);
+        `)
+      )[0] as unknown as Localization[];
 
-      console.log(subquery);
-      return { result: subquery[0] };
-      // result = (
-      //   await dbConnection
-      //     .select({
-      //       id: Locales.id,
-      //       name: Locales.name,
-      //       address: Locales.address,
-      //       localizationLink: Locales.localizationLink,
-      //       photos: subquery.photosArray,
-      //       // favorite: sql`CASE WHEN ${Favorites.localeId} = ${Locales.id} AND ${Favorites.userId} = ${userId} THEN true ELSE false END`,
-      //       grade: Locales.grade,
-      //     })
-      //     .from(Locales)
-      //     .leftJoin(subquery.photoSubquery, eq(Locales.id, subquery.localeId))
-      // )[0];
-      // .leftJoin(
-      //   Favorites,
-      //   and(
-      //     eq(Favorites.localeId, Locales.id),
-      //     eq(Favorites.userId, userId),
-      //   ),
-      // )
+      return { result: result[0], status: 200 };
+    }
+    if (index === 1) {
+      result = (
+        await dbConnection
+          .select({
+            sundayHours: ScheduledHours.sundayHours,
+            mondayHours: ScheduledHours.mondayHours,
+            tuesdayHours: ScheduledHours.tuesdayHours,
+            wednesdayHours: ScheduledHours.wednesdayHours,
+            thursdayHours: ScheduledHours.thursdayHours,
+            fridayHours: ScheduledHours.fridayHours,
+            saturdayHours: ScheduledHours.saturdayHours,
+          })
+          .from(ScheduledHours)
+          .where(eq(ScheduledHours.localeId, localeId))
+      )[0] as Hours;
+      return { result, status: 200 };
+    }
+    if (index === 2) {
+      result = (
+        await dbConnection
+          .select({
+            about: Locales.about,
+            observation: Locales.observation,
+            phoneNumber: Locales.phoneNumber,
+          })
+          .from(Locales)
+      )[0] as MoreInfo;
+
+      return { result, status: 200 };
     }
   } catch (error) {
     if (error instanceof Error) {
