@@ -260,8 +260,8 @@
           "notNull": true,
           "autoincrement": false
         },
-        "localization_link": {
-          "name": "localization_link",
+        "localizationLink": {
+          "name": "localizationLink",
           "type": "varchar(255)",
           "primaryKey": false,
           "notNull": true,
@@ -302,8 +302,8 @@
           "notNull": true,
           "autoincrement": false
         },
-        "phone_number": {
-          "name": "phone_number",
+        "phoneNumber": {
+          "name": "phoneNumber",
           "type": "varchar(11)",
           "primaryKey": false,
           "notNull": false,
