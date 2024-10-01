@@ -17,7 +17,10 @@ type ResultAction = {
   affectedRows: number;
 };
 
-const deleteReviewService = async (localeId: number, userId: number) => {
+const deleteReviewService = async (
+  localeId: number,
+  userId: number,
+): Promise<ResultReply> => {
   const dbConnection = await db();
 
   try {
