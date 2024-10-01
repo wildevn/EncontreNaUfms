@@ -147,3 +147,42 @@ ALTER TABLE `Sports`
 ALTER TABLE `Transports`
     ADD KEY `localeId` (`localeId`),
     ADD CONSTRAINT `Transports_ibfk_1` FOREIGN KEY (`localeId`) REFERENCES `Locales` (`id`) ON DELETE CASCADE ON UPDATE CASCADE;
+
+
+--- Trigger creations
+
+CREATE TRIGGER insert_review_grades_updater
+AFTER INSERT
+ON Reviews
+FOR EACH ROW
+    UPDATE Locales AS locale
+    SET grade = (
+        SELECT AVG(grade)
+        FROM Reviews AS review
+        WHERE review.localeId = NEW.localeId
+    )
+    WHERE locale.id = NEW.localeId;
+
+CREATE TRIGGER update_review_grades_updater
+AFTER UPDATE
+ON Reviews
+FOR EACH ROW
+    UPDATE Locales AS locale
+    SET grade = (
+        SELECT AVG(grade)
+        FROM Reviews AS review
+        WHERE review.localeId = NEW.localeId
+    )
+    WHERE locale.id = NEW.localeId;
+   
+CREATE TRIGGER delete_review_grades_updater
+AFTER DELETE
+ON Reviews
+FOR EACH ROW
+    UPDATE Locales AS locale
+    SET grade = IFNULL( (
+        SELECT AVG(grade)
+        FROM Reviews AS review
+        WHERE review.localeId = OLD.localeId
+    ), '0.0')
+    WHERE locale.id = OLD.localeId;

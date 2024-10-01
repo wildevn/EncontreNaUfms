@@ -121,3 +121,40 @@ ALTER TABLE `Reviews` ADD CONSTRAINT `Reviews_localeId_Locales_id_fk` FOREIGN KE
 ALTER TABLE `ScheduledHours` ADD CONSTRAINT `ScheduledHours_localeId_Locales_id_fk` FOREIGN KEY (`localeId`) REFERENCES `Locales`(`id`) ON DELETE cascade ON UPDATE cascade;--> statement-breakpoint
 ALTER TABLE `Sports` ADD CONSTRAINT `Sports_localeId_Locales_id_fk` FOREIGN KEY (`localeId`) REFERENCES `Locales`(`id`) ON DELETE cascade ON UPDATE cascade;--> statement-breakpoint
 ALTER TABLE `Transports` ADD CONSTRAINT `Transports_localeId_Locales_id_fk` FOREIGN KEY (`localeId`) REFERENCES `Locales`(`id`) ON DELETE cascade ON UPDATE cascade;
+
+
+CREATE TRIGGER insert_review_grades_updater
+AFTER INSERT
+ON Reviews
+FOR EACH ROW
+    UPDATE Locales AS locale
+    SET grade = (
+        SELECT AVG(grade)
+        FROM Reviews AS review
+        WHERE review.localeId = NEW.localeId
+    )
+    WHERE locale.id = NEW.localeId;
+
+CREATE TRIGGER update_review_grades_updater
+AFTER UPDATE
+ON Reviews
+FOR EACH ROW
+    UPDATE Locales AS locale
+    SET grade = (
+        SELECT AVG(grade)
+        FROM Reviews AS review
+        WHERE review.localeId = NEW.localeId
+    )
+    WHERE locale.id = NEW.localeId;
+   
+CREATE TRIGGER delete_review_grades_updater
+AFTER DELETE
+ON Reviews
+FOR EACH ROW
+    UPDATE Locales AS locale
+    SET grade = IFNULL( (
+        SELECT AVG(grade)
+        FROM Reviews AS review
+        WHERE review.localeId = OLD.localeId
+    ), '0.0')
+    WHERE locale.id = OLD.localeId;
