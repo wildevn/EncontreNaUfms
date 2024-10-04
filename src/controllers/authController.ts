@@ -6,6 +6,9 @@ import createOrUpdateUserService, {
   type ErrorType,
 } from "@/services/userServices/createOrUpdateUserService";
 import logInService from "@/services/userServices/logInService";
+import recoveryPasswordService, {
+  type Reply,
+} from "@/services/userServices/recoveryPasswordService";
 import type {
   FastifyReply,
   FastifyRequest,
@@ -25,6 +28,12 @@ export type RegisterRequest = {
     name: string;
     email: string;
     password: string;
+  };
+};
+
+export type RecoveryRequest = {
+  Body: {
+    email: string;
   };
 };
 export type TokenRequest = {
@@ -64,6 +73,17 @@ export const registerOpts: RouteShorthandOptions = {
   },
 };
 
+export const recoveryOpts: RouteShorthandOptions = {
+  schema: {
+    body: {
+      type: "object",
+      required: ["email"],
+      properties: {
+        email: { type: "string" },
+      },
+    },
+  },
+};
 export const tokenOpts: RouteShorthandOptions = {
   schema: {
     headers: {
@@ -114,6 +134,20 @@ const register = async (
   return reply.status(newUser.status).send({ ...newUser });
 };
 
+const recovery = async (
+  request: FastifyRequest<RecoveryRequest>,
+  reply: FastifyReply,
+): Promise<Reply> => {
+  const { email } = request.body;
+
+  const result: Reply = await recoveryPasswordService(email);
+
+  if ("error" in result) {
+    return reply.status(result.status).send({ error: result.error });
+  }
+  return reply.status(result.status).send({ ...result });
+};
+
 const refresh = async (
   request: FastifyRequest<TokenRequest>,
   reply: FastifyReply,
@@ -158,4 +192,4 @@ const verify = async (
   return reply.status(200).send({ result: "valid token" });
 };
 
-export default { login, register, refresh, verify };
+export default { login, register, recovery, refresh, verify };
