@@ -8,15 +8,18 @@ export type LocaleRow = {
   id: number;
   name: string;
   address: string;
-  mainPhoto: {
-    id: number;
-    name: string;
-    data: string;
-  } | null;
+  mainPhoto:
+    | {
+        id: number;
+        name: string;
+        data: string;
+      }
+    | unknown;
   type: number;
   isOpen?: boolean;
   favorite: number | unknown;
   grade: number | string;
+  viewd?: number;
 };
 
 export type ScheduledHoursRow = {
@@ -140,17 +143,12 @@ const showLocalesService = async (
           id: Locales.id,
           name: Locales.name,
           address: Locales.address,
-          mainPhoto: {
-            id: Photos.id,
-            name: Photos.name,
-            data: Photos.data,
-          },
+          mainPhoto: sql`(SELECT json_object('id', photo.id, 'name', photo.name, 'data', photo.data) FROM Photos as photo WHERE photo.localeId = ${Locales.id} ORDER BY photo.id ASC LIMIT 1)`,
           type: Locales.type,
           favorite: sql`CASE WHEN ${Favorites.localeId} = ${Locales.id} AND ${Favorites.userId} = ${userId} THEN true ELSE false END`,
           grade: Locales.grade,
         })
         .from(Locales)
-        .leftJoin(Photos, eq(Locales.id, Photos.localeId))
         .leftJoin(
           Favorites,
           and(eq(Favorites.localeId, Locales.id), eq(Favorites.userId, userId)),
@@ -163,17 +161,12 @@ const showLocalesService = async (
           id: Locales.id,
           name: Locales.name,
           address: Locales.address,
-          mainPhoto: {
-            id: Photos.id,
-            name: Photos.name,
-            data: Photos.data,
-          },
+          mainPhoto: sql`(SELECT json_object('id', photo.id, 'name', photo.name, 'data', photo.data) FROM Photos as photo WHERE photo.localeId = ${Locales.id} ORDER BY photo.id ASC LIMIT 1)`,
           type: Locales.type,
           favorite: sql`CASE WHEN ${Favorites.localeId} = ${Locales.id} AND ${Favorites.userId} = ${userId} THEN true ELSE false END`,
           grade: Locales.grade,
         })
         .from(Locales)
-        .leftJoin(Photos, eq(Locales.id, Photos.localeId))
         .leftJoin(
           Favorites,
           and(eq(Favorites.localeId, Locales.id), eq(Favorites.userId, userId)),
