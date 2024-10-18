@@ -163,7 +163,6 @@ export const Transports = mysqlTable("Transports", {
     .references(() => Locales.id, { onDelete: "cascade", onUpdate: "cascade" })
     .unique(),
   availableBuses: varchar("availableBuses", { length: 30 }).notNull(),
-  rules: text("rules"),
   createdAt: date("createdAt").notNull(),
   updatedAt: date("updatedAt").notNull(),
 });
