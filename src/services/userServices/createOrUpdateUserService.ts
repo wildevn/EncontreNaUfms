@@ -99,7 +99,7 @@ const createOrUpdateUserService = async (
   const date = new Date();
   const hashedPassword = await hashPassword(password);
   if (typeof hashedPassword === "object") {
-    return { error: hashedPassword.error, status: 400 };
+    return { error: hashedPassword.error, status: 500 };
   }
 
   const newUser = (
@@ -116,7 +116,7 @@ const createOrUpdateUserService = async (
   )[0];
 
   if (!newUser) {
-    return { error: `User not created: ${newUser}`, status: 400 };
+    return { error: `User not created: ${newUser}`, status: 500 };
   }
   const tokens = createTokens({ id: newUser.id, name, email });
   return {
