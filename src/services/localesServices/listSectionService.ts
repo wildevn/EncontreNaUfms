@@ -20,7 +20,7 @@ type Localization = {
   favorite: boolean;
 };
 
-type Hours = {
+export type Hours = {
   sundayHours: string;
   mondayHours: string;
   tuesdayHours: string;

@@ -9,7 +9,7 @@ type Review = {
   grade?: number;
 };
 
-type ResultAction = {
+export type ResultAction = {
   affectedRows: number;
 };
 

@@ -57,7 +57,7 @@ export const scheduleAttributes = [
   "saturdayHours",
 ];
 
-const LocaleTypes: Array<string> = [
+export const LocaleTypes: Array<string> = [
   "academicblocks", // 0
   "touristspoints", // 1
   "banks", // 2
