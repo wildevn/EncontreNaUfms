@@ -10,15 +10,34 @@ import type {
   RouteShorthandOptions,
 } from "fastify";
 import decodeToken from "@/helpers/decodeToken";
+import createLocaleService, {
+  type Result,
+  type Locale,
+} from "@/services/localesServices/createLocaleService";
+// import updateLocaleService from "@/services/localesServices/UpdateLocaleService";
+// import { request } from "node:http";
 
 export type ListLocalesRequest = {
   Params: { categoryList: string };
-  Querystring: { pageNumber: string; limit: string };
+  Querystring: { searchParam: string; pageNumber: string; limit: string };
 };
 
 export type SectionRequest = {
   Params: { localeId: string };
   Querystring: { sectionId: string };
+};
+
+export type InsertLocaleRequest = {
+  Body: { locale: Locale };
+};
+
+export type EditLocaleRequest = {
+  Params: { localeId: string };
+  Body: { locale: Locale };
+};
+
+export type DeleteLocaleRequest = {
+  Params: { localeId: string };
 };
 
 export const listOpts: RouteShorthandOptions = {
@@ -40,6 +59,7 @@ export const listOpts: RouteShorthandOptions = {
       type: "object",
       required: ["pageNumber", "limit"],
       properties: {
+        searchParam: { type: "string" },
         pageNumber: { type: "string" },
         limit: { type: "string" },
       },
@@ -72,13 +92,101 @@ export const listSectionOpts: RouteShorthandOptions = {
   },
 };
 
+export const localeOtps: RouteShorthandOptions = {
+  schema: {
+    headers: {
+      type: "object",
+      properties: {
+        authorization: { type: "string" },
+      },
+    },
+    body: {
+      type: "object",
+      required: ["locale"],
+      properties: {
+        locale: {
+          type: "object",
+          required: ["name", "address", "type"],
+          properties: {
+            // basic info for a locale
+            name: { type: "string" },
+            localizationLink: { type: "string" },
+            latitude: { type: "number" },
+            longitude: { type: "number" },
+            address: { type: "string" },
+            about: { type: "string" },
+            observation: { type: "string" },
+            type: { type: "number" },
+            phoneNumber: { type: "string" },
+            accessibility: { type: "boolean" },
+
+            photos: {
+              type: "array",
+              items: {
+                type: "object",
+                properties: {
+                  name: { type: "string" },
+                  data: { type: "string" },
+                },
+              },
+            },
+
+            schedule: {
+              type: "object",
+              properties: {
+                monday: { type: "string" },
+                tuesday: { type: "string" },
+                wednesday: { type: "string" },
+                thursday: { type: "string" },
+                friday: { type: "string" },
+                saturday: { type: "string" },
+                sunday: { type: "string" },
+              },
+            },
+
+            // for specific types (AcademicBlocks, Libraries, Sports, Transports)
+            specialInfo: {
+              type: "object",
+              properties: {
+                course: { type: "string" },
+                libraryLink: { type: "string" },
+                availableSports: { type: "string" },
+                availableBuses: { type: "string" },
+                rules: { type: "string" },
+              },
+            },
+          },
+        },
+      },
+    },
+  },
+};
+
+export const deleteLocaleOpts: RouteShorthandOptions = {
+  schema: {
+    headers: {
+      type: "object",
+      properties: {
+        authorization: { type: "string" },
+      },
+    },
+    params: {
+      type: "object",
+      required: ["localeId"],
+      properties: {
+        localeId: { type: "string" },
+      },
+    },
+  },
+};
+
 // continuar a função, finalizando
 const list = async (
   request: FastifyRequest<ListLocalesRequest>,
   reply: FastifyReply,
 ) => {
   const { categoryList } = request.params;
-  const { pageNumber, limit } = request.query;
+  const { searchParam, pageNumber, limit } = request.query;
   let userId = 0;
 
   if ("authorization" in request.headers && request.headers.authorization) {
@@ -99,6 +207,7 @@ const list = async (
       Number.parseInt(limit),
       userId,
       parsedCategoryList,
+      searchParam,
     );
     if ("error" in data) {
       return reply.status(400).send({ error: { message: data.error } });
@@ -142,4 +251,41 @@ const listSection = async (
     .send({ error: "Inernal Server Error, please try again" });
 };
 
-export default { list, listSection };
+const insert = async (
+  request: FastifyRequest<InsertLocaleRequest>,
+  reply: FastifyReply,
+) => {
+  // const { locale } = request.body;
+  // const newLocale: Result = await createLocaleService(locale);
+  // if ("error" in newLocale) {
+  //   return reply.status(newLocale.status).send({ error: newLocale.error });
+  // }
+  // return reply.status(newLocale.status).send({ data: newLocale.result });
+};
+
+const edit = async (
+  request: FastifyRequest<EditLocaleRequest>,
+  reply: FastifyReply,
+) => {
+  // const { locale } = request.body;
+  // const { localeId } = request.params;
+  // const updatedLocale: Result = await updateLocaleService(
+  //   locale,
+  //   Number.parseInt(localeId),
+  // );
+  // if ("error" in updatedLocale) {
+  //   return reply
+  //     .status(updatedLocale.status)
+  //     .send({ error: updatedLocale.error });
+  // }
+  // return reply
+  //   .status(updatedLocale.status)
+  //   .send({ data: updatedLocale.result });
+};
+
+const deleteById = async (
+  request: FastifyRequest<DeleteLocaleRequest>,
+  reply: FastifyReply,
+) => {};
+
+export default { list, listSection, insert, edit, deleteById };

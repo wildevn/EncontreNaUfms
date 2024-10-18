@@ -2,6 +2,8 @@
 // TODO: Connect on DB, get all data and return
 import { db } from "@database/db";
 import { Favorites, Locales, Photos, ScheduledHours } from "@database/schema";
+import { like } from "drizzle-orm";
+import { or, type SQL } from "drizzle-orm";
 import { sql, inArray, and, count, eq } from "drizzle-orm";
 
 export type LocaleRow = {
@@ -126,6 +128,7 @@ const showLocalesService = async (
   limit: number,
   userId: number,
   categoryList: Array<string>,
+  searchParam: string,
 ): Promise<Data | LocaleError> => {
   const dbConnection = await db();
   const categories = categoryVerifier(categoryList);
@@ -137,44 +140,48 @@ const showLocalesService = async (
     return { error: categories };
   }
 
-  const locales: LocaleRow[] = Array.isArray(categories)
-    ? await dbConnection
-        .select({
-          id: Locales.id,
-          name: Locales.name,
-          address: Locales.address,
-          mainPhoto: sql`(SELECT json_object('id', photo.id, 'name', photo.name, 'data', photo.data) FROM Photos as photo WHERE photo.localeId = ${Locales.id} ORDER BY photo.id ASC LIMIT 1)`,
-          type: Locales.type,
-          favorite: sql`CASE WHEN ${Favorites.localeId} = ${Locales.id} AND ${Favorites.userId} = ${userId} THEN true ELSE false END`,
-          grade: Locales.grade,
-          viewed: sql`CASE WHEN (SELECT 1 FROM (SELECT * FROM Histories WHERE userId = ${userId} ORDER BY updatedAt DESC LIMIT 10) as histories WHERE histories.localeId = ${Locales.id}) = 1 THEN true ELSE false END`,
-        })
-        .from(Locales)
-        .leftJoin(
-          Favorites,
-          and(eq(Favorites.localeId, Locales.id), eq(Favorites.userId, userId)),
-        )
-        .where(inArray(Locales.type, categories))
-        .limit(limit)
-        .offset(limit * (pageNumber - 1))
-    : await dbConnection
-        .select({
-          id: Locales.id,
-          name: Locales.name,
-          address: Locales.address,
-          mainPhoto: sql`(SELECT json_object('id', photo.id, 'name', photo.name, 'data', photo.data) FROM Photos as photo WHERE photo.localeId = ${Locales.id} ORDER BY photo.id ASC LIMIT 1)`,
-          type: Locales.type,
-          favorite: sql`CASE WHEN ${Favorites.localeId} = ${Locales.id} AND ${Favorites.userId} = ${userId} THEN true ELSE false END`,
-          grade: Locales.grade,
-          viewed: sql`CASE WHEN (SELECT 1 FROM (SELECT * FROM Histories WHERE userId = ${userId} ORDER BY updatedAt DESC LIMIT 10) as histories WHERE histories.localeId = ${Locales.id}) = 1 THEN true ELSE false END`,
-        })
-        .from(Locales)
-        .leftJoin(
-          Favorites,
-          and(eq(Favorites.localeId, Locales.id), eq(Favorites.userId, userId)),
-        )
-        .limit(limit)
-        .offset(limit * (pageNumber - 1));
+  let where: SQL<unknown> | undefined;
+
+  if (Array.isArray(categories)) {
+    where = inArray(Locales.type, categories);
+  }
+
+  if (searchParam) {
+    if (where) {
+      where = and(
+        where,
+        or(
+          like(Locales.name, `%${searchParam}%`),
+          like(Locales.address, `%${searchParam}%`),
+        ),
+      );
+    } else {
+      where = or(
+        like(Locales.name, `%${searchParam}%`),
+        like(Locales.address, `%${searchParam}%`),
+      );
+    }
+  }
+
+  const locales: LocaleRow[] = (await dbConnection
+    .select({
+      id: Locales.id,
+      name: Locales.name,
+      address: Locales.address,
+      mainPhoto: sql`(SELECT json_object('id', photo.id, 'name', photo.name, 'data', photo.data) FROM Photos as photo WHERE photo.localeId = ${Locales.id} ORDER BY photo.id ASC LIMIT 1)`,
+      type: Locales.type,
+      favorite: sql`CASE WHEN ${Favorites.localeId} = ${Locales.id} AND ${Favorites.userId} = ${userId} THEN true ELSE false END`,
+      grade: Locales.grade,
+      viewed: sql`CASE WHEN (SELECT 1 FROM (SELECT * FROM Histories WHERE userId = ${userId} ORDER BY updatedAt DESC LIMIT 10) as histories WHERE histories.localeId = ${Locales.id}) = 1 THEN true ELSE false END`,
+    })
+    .from(Locales)
+    .leftJoin(
+      Favorites,
+      and(eq(Favorites.localeId, Locales.id), eq(Favorites.userId, userId)),
+    )
+    .where(where)
+    .limit(limit)
+    .offset(limit * (pageNumber - 1))) as LocaleRow[];
 
   const scheduleRows: ScheduledHoursRow[] = await dbConnection
     .select({
