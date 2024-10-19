@@ -217,7 +217,7 @@ const showLocalesService = async (
           .from(Locales)
           .where(inArray(Locales.type, categories))
       )[0].count
-    : (await dbConnection.select({ count: count() }).from(Locales))[0].count;
+    : (await dbConnection.select({ count: count() }).from(Locales).where(where))[0].count;
 
   return {
     locales,
