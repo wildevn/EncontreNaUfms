@@ -24,6 +24,12 @@ export type ErrorType = {
   error: string;
 };
 
+type NewData = {
+  name?: string;
+  password?: string;
+  updatedAt: Date;
+};
+
 const hashPassword = async (
   password: string,
 ): Promise<string | { error: string }> => {
@@ -43,6 +49,7 @@ const createOrUpdateUserService = async (
   editUser?: boolean,
 ): Promise<UserReply> => {
   const dbConnection = await db();
+  let hashedPassword: string | { error: string } = "";
 
   const user = (
     await dbConnection
@@ -60,15 +67,27 @@ const createOrUpdateUserService = async (
       return { error: "User not found", status: 404 };
     }
 
-    const hashedPassword = await hashPassword(password);
-    if (typeof hashedPassword === "object") {
-      return { error: hashedPassword.error, status: 400 };
+    const setNewData: NewData = {
+      updatedAt: new Date(),
+    };
+
+    if (name) {
+      setNewData.name = name;
+    }
+
+    if (password) {
+      hashedPassword = await hashPassword(password);
+      if (typeof hashedPassword === "object") {
+        return { error: hashedPassword.error, status: 400 };
+      }
+
+      setNewData.password = hashedPassword;
     }
 
     const result: { info?: string } = (
       await dbConnection
         .update(Users)
-        .set({ name, email, password: hashedPassword })
+        .set(setNewData)
         .where(eq(Users.email, email))
     )[0];
 
@@ -97,7 +116,7 @@ const createOrUpdateUserService = async (
   }
 
   const date = new Date();
-  const hashedPassword = await hashPassword(password);
+  hashedPassword = await hashPassword(password);
   if (typeof hashedPassword === "object") {
     return { error: hashedPassword.error, status: 500 };
   }

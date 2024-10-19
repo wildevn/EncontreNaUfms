@@ -29,7 +29,7 @@ export const editOpts: RouteShorthandOptions = {
   schema: {
     body: {
       type: "object",
-      required: ["name", "email", "password"],
+      required: ["email"],
       properties: {
         name: { type: "string" },
         email: { type: "string" },
