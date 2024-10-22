@@ -2,7 +2,8 @@ import type { FastifyInstance, FastifyPluginOptions } from "fastify";
 import localesController, {
   listOpts,
   listSectionOpts,
-  localeOtps,
+  insertLocaleOtps,
+  editLocaleOtps,
   deleteLocaleOpts,
   type ListLocalesRequest,
   type SectionRequest,
@@ -27,12 +28,12 @@ const locales = async (app: FastifyInstance, options: FastifyPluginOptions) => {
 
   app.post<InsertLocaleRequest>(
     "/locales/new",
-    localeOtps,
+    insertLocaleOtps,
     localesController.insert,
   );
   app.put<EditLocaleRequest>(
     "/locales/edit/:localeId",
-    localeOtps,
+    editLocaleOtps,
     localesController.edit,
   );
   app.delete<DeleteLocaleRequest>(

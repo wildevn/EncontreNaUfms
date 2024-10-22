@@ -14,6 +14,10 @@ import createLocaleService, {
   type Result,
   type Locale,
 } from "@/services/localesServices/createLocaleService";
+import updateLocaleService, {
+  type EditResult,
+  type EditLocale,
+} from "@/services/localesServices/updateLocaleService";
 // import updateLocaleService from "@/services/localesServices/UpdateLocaleService";
 // import { request } from "node:http";
 
@@ -33,7 +37,7 @@ export type InsertLocaleRequest = {
 
 export type EditLocaleRequest = {
   Params: { localeId: string };
-  Body: { locale: Locale };
+  Body: { locale: EditLocale };
 };
 
 export type DeleteLocaleRequest = {
@@ -92,7 +96,7 @@ export const listSectionOpts: RouteShorthandOptions = {
   },
 };
 
-export const localeOtps: RouteShorthandOptions = {
+export const insertLocaleOtps: RouteShorthandOptions = {
   schema: {
     headers: {
       type: "object",
@@ -111,8 +115,84 @@ export const localeOtps: RouteShorthandOptions = {
             // basic info for a locale
             name: { type: "string" },
             localizationLink: { type: "string" },
-            latitude: { type: "number" },
-            longitude: { type: "number" },
+            latitude: { type: "string" },
+            longitude: { type: "string" },
+            address: { type: "string" },
+            about: { type: "string" },
+            observation: { type: "string" },
+            type: { type: "number" },
+            phoneNumber: { type: "string" },
+            accessibility: { type: "boolean" },
+
+            photos: {
+              type: "array",
+              items: {
+                type: "object",
+                properties: {
+                  name: { type: "string" },
+                  data: { type: "string" },
+                },
+              },
+            },
+
+            schedule: {
+              type: "object",
+              properties: {
+                monday: { type: "string" },
+                tuesday: { type: "string" },
+                wednesday: { type: "string" },
+                thursday: { type: "string" },
+                friday: { type: "string" },
+                saturday: { type: "string" },
+                sunday: { type: "string" },
+              },
+            },
+
+            // for specific types (AcademicBlocks, Libraries, Sports, Transports)
+            specialInfo: {
+              type: "object",
+              properties: {
+                course: { type: "string" },
+                libraryLink: { type: "string" },
+                availableSports: { type: "string" },
+                availableBuses: { type: "string" },
+                rules: { type: "string" },
+              },
+            },
+          },
+        },
+      },
+    },
+  },
+};
+
+export const editLocaleOtps: RouteShorthandOptions = {
+  schema: {
+    headers: {
+      type: "object",
+      properties: {
+        authorization: { type: "string" },
+      },
+    },
+    params: {
+      type: "object",
+      required: ["localeId"],
+      properties: {
+        localeId: { type: "string" },
+      },
+    },
+    body: {
+      type: "object",
+      required: ["locale"],
+      properties: {
+        locale: {
+          type: "object",
+          properties: {
+            // basic info for a locale
+            name: { type: "string" },
+            localizationLink: { type: "string" },
+            latitude: { type: "string" },
+            longitude: { type: "string" },
             address: { type: "string" },
             about: { type: "string" },
             observation: { type: "string" },
@@ -255,32 +335,38 @@ const insert = async (
   request: FastifyRequest<InsertLocaleRequest>,
   reply: FastifyReply,
 ) => {
-  // const { locale } = request.body;
-  // const newLocale: Result = await createLocaleService(locale);
-  // if ("error" in newLocale) {
-  //   return reply.status(newLocale.status).send({ error: newLocale.error });
-  // }
-  // return reply.status(newLocale.status).send({ data: newLocale.result });
+  const { locale } = request.body;
+
+  const newLocale: Result = await createLocaleService(locale);
+
+  if ("error" in newLocale) {
+    return reply.status(newLocale.status).send({ error: newLocale.error });
+  }
+  return reply.status(newLocale.status).send({ data: newLocale.result });
 };
 
 const edit = async (
   request: FastifyRequest<EditLocaleRequest>,
   reply: FastifyReply,
 ) => {
-  // const { locale } = request.body;
-  // const { localeId } = request.params;
-  // const updatedLocale: Result = await updateLocaleService(
-  //   locale,
-  //   Number.parseInt(localeId),
-  // );
-  // if ("error" in updatedLocale) {
-  //   return reply
-  //     .status(updatedLocale.status)
-  //     .send({ error: updatedLocale.error });
-  // }
-  // return reply
-  //   .status(updatedLocale.status)
-  //   .send({ data: updatedLocale.result });
+  const { locale } = request.body;
+  const { localeId } = request.params;
+
+  if (localeId) {
+    const updatedLocale: EditResult = await updateLocaleService(
+      locale,
+      Number.parseInt(localeId),
+    );
+    if ("error" in updatedLocale) {
+      return reply
+        .status(updatedLocale.status)
+        .send({ error: updatedLocale.error });
+    }
+    return reply
+      .status(updatedLocale.status)
+      .send({ data: updatedLocale.result });
+  }
+  return reply.status(400).send({ error: "required parameter: localeId" });
 };
 
 const deleteById = async (

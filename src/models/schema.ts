@@ -31,7 +31,7 @@ export const Locales = mysqlTable("Locales", {
   type: tinyint("type").notNull(),
   phoneNumber: varchar("phoneNumber", { length: 11 }),
   accessibility: tinyint("accessibility"),
-  grade: decimal("grade", { precision: 10, scale: 2 }).notNull(),
+  grade: decimal("grade", { precision: 10, scale: 2 }),
   createdAt: date("createdAt").notNull(),
   updatedAt: date("updatedAt").notNull(),
 });
