@@ -110,7 +110,7 @@ CREATE TABLE `Transports` (
 
 -- Constraints --
 ALTER TABLE `ScheduledHours`
-    ADD KEY `localeId` (`localeId`),
+    ADD UNIQUE KEY `localeId` (`localeId`),
     ADD CONSTRAINT `ScheduledHours_ibfk_1` FOREIGN KEY (`localeId`) REFERENCES `Locales` (`id`) ON DELETE CASCADE ON UPDATE CASCADE;
 
 ALTER TABLE `Photos`
@@ -133,19 +133,19 @@ ALTER TABLE `Reviews`
     ADD CONSTRAINT `Reviews_ibfk_2` FOREIGN KEY (`localeId`) REFERENCES `Locales` (`id`) ON DELETE CASCADE ON UPDATE CASCADE;
 
 ALTER TABLE `AcademicBlocks`
-    ADD KEY `localeId` (`localeId`),
+    ADD UNIQUE KEY `localeId` (`localeId`),
     ADD CONSTRAINT `AcademicBlocks_ibfk_1` FOREIGN KEY (`localeId`) REFERENCES `Locales` (`id`) ON DELETE CASCADE ON UPDATE CASCADE;
 
 ALTER TABLE `Libraries`
-    ADD KEY `localeId` (`localeId`),
+    ADD UNIQUE KEY `localeId` (`localeId`),
     ADD CONSTRAINT `Libraries_ibfk_1` FOREIGN KEY (`localeId`) REFERENCES `Locales` (`id`) ON DELETE CASCADE ON UPDATE CASCADE;
 
 ALTER TABLE `Sports`
-    ADD KEY `localeId` (`localeId`),
+    ADD UNIQUE KEY `localeId` (`localeId`),
     ADD CONSTRAINT `Sports_ibfk_1` FOREIGN KEY (`localeId`) REFERENCES `Locales` (`id`) ON DELETE CASCADE ON UPDATE CASCADE;
 
 ALTER TABLE `Transports`
-    ADD KEY `localeId` (`localeId`),
+    ADD UNIQUE KEY `localeId` (`localeId`),
     ADD CONSTRAINT `Transports_ibfk_1` FOREIGN KEY (`localeId`) REFERENCES `Locales` (`id`) ON DELETE CASCADE ON UPDATE CASCADE;
 
 
