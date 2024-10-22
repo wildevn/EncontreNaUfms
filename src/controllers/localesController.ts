@@ -18,6 +18,7 @@ import updateLocaleService, {
   type EditResult,
   type EditLocale,
 } from "@/services/localesServices/updateLocaleService";
+import deleteLocaleService from "@/services/localesServices/deleteLocaleService";
 // import updateLocaleService from "@/services/localesServices/UpdateLocaleService";
 // import { request } from "node:http";
 
@@ -372,6 +373,23 @@ const edit = async (
 const deleteById = async (
   request: FastifyRequest<DeleteLocaleRequest>,
   reply: FastifyReply,
-) => {};
+) => {
+  const { localeId } = request.params;
+  if (localeId) {
+    const deletedLocale: Result = await deleteLocaleService(
+      Number.parseInt(localeId),
+    );
+
+    if ("error" in deletedLocale) {
+      return reply
+        .status(deletedLocale.status)
+        .send({ error: deletedLocale.error });
+    }
+    return reply
+      .status(deletedLocale.status)
+      .send({ data: deletedLocale.result });
+  }
+  return reply.status(400).send({ error: "required parameter: localeId" });
+};
 
 export default { list, listSection, insert, edit, deleteById };
