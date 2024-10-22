@@ -320,7 +320,7 @@
           "name": "grade",
           "type": "decimal",
           "primaryKey": false,
-          "notNull": true,
+          "notNull": false,
           "autoincrement": false,
           "default": "'0.0'"
         },
