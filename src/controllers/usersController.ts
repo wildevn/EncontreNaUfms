@@ -1,9 +1,11 @@
 import isAuth from "@/middlewares/isAuth";
+import isUser from "@/middlewares/isUser";
 import createOrUpdateUserService, {
   type UserReply,
   type User,
   type ErrorType,
 } from "@/services/userServices/createOrUpdateUserService";
+import deleteUserService from "@/services/userServices/deleteUserService";
 import getUserInfoService from "@/services/userServices/getUserInfoService";
 import type {
   FastifyReply,
@@ -22,6 +24,15 @@ export type EditRequest = {
 export type InfoRequest = {
   Params: {
     email: string;
+  };
+};
+
+export type DeleteRequest = {
+  Headers: {
+    authentication: string;
+  };
+  Params: {
+    userEmail: string;
   };
 };
 
@@ -51,6 +62,27 @@ export const userInfoOpts: RouteShorthandOptions = {
     },
   },
   preHandler: isAuth,
+};
+
+export const userDeleteOpts: RouteShorthandOptions = {
+  schema: {
+    headers: {
+      type: "object",
+      properties: {
+        authentication: {
+          type: "string",
+        },
+      },
+    },
+    params: {
+      type: "object",
+      required: ["userEmail"],
+      properties: {
+        userEmail: { type: "string" },
+      },
+    },
+  },
+  preHandler: isUser,
 };
 
 const edit = async (
@@ -86,4 +118,24 @@ const info = async (
   return reply.status(user.status).send({ user: user.user });
 };
 
-export default { edit, info };
+const deleteByEmail = async (
+  request: FastifyRequest<DeleteRequest>,
+  reply: FastifyReply,
+) => {
+  const { userEmail } = request.params;
+  if (userEmail) {
+    const deletedUser = await deleteUserService(userEmail);
+
+    if ("error" in deletedUser) {
+      return reply
+        .status(deletedUser.status)
+        .send({ error: deletedUser.error });
+    }
+    return reply
+      .status(deletedUser.status)
+      .send({ result: deletedUser.result });
+  }
+  return reply.status(400).send({ error: "required parameter: userEmail" });
+};
+
+export default { edit, info, deleteByEmail };

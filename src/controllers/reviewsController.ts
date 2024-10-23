@@ -115,7 +115,7 @@ const createOrUpdate = async (
 
   if ("authorization" in request.headers && request.headers.authorization) {
     const { authorization } = request.headers;
-    const userId = decodeToken(authorization);
+    const userId = decodeToken(authorization) as number;
 
     if (userId) {
       const result = await createOrUpdateReviewService(
@@ -143,7 +143,7 @@ const getReview = async (
   const { localeId } = request.params;
   if ("authorization" in request.headers && request.headers.authorization) {
     const { authorization } = request.headers;
-    const userId = decodeToken(authorization);
+    const userId = decodeToken(authorization) as number;
     if (userId) {
       const result = await getReviewService(Number.parseInt(localeId), userId);
       if ("error" in result) {
@@ -165,7 +165,7 @@ const deleteById = async (
   const { localeId } = request.params;
   if ("authorization" in request.headers && request.headers.authorization) {
     const { authorization } = request.headers;
-    const userId = decodeToken(authorization);
+    const userId = decodeToken(authorization) as number;
     if (userId) {
       const result = await deleteReviewService(
         Number.parseInt(localeId),

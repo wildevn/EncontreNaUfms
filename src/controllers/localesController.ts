@@ -272,7 +272,7 @@ const list = async (
 
   if ("authorization" in request.headers && request.headers.authorization) {
     const { authorization } = request.headers;
-    userId = decodeToken(authorization);
+    userId = decodeToken(authorization) as number;
   }
 
   if (pageNumber && limit) {
@@ -310,7 +310,7 @@ const listSection = async (
 
   if ("authorization" in request.headers && request.headers.authorization) {
     const { authorization } = request.headers;
-    userId = decodeToken(authorization);
+    userId = decodeToken(authorization) as number;
   }
 
   const sectionInfo = await listSectionService(
