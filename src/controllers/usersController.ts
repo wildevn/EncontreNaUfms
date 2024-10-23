@@ -48,7 +48,7 @@ export const editOpts: RouteShorthandOptions = {
       },
     },
   },
-  preHandler: isAuth,
+  preHandler: isUser,
 };
 
 export const userInfoOpts: RouteShorthandOptions = {

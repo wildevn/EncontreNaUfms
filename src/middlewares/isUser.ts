@@ -1,11 +1,16 @@
 import type { FastifyReply, FastifyRequest } from "fastify";
 import verifyToken from "@/helpers/verifyToken";
-import type { DeleteRequest } from "@/controllers/usersController";
+import type { DeleteRequest, EditRequest } from "@/controllers/usersController";
 import decodeToken from "@/helpers/decodeToken";
 
 const isUser = async (request: FastifyRequest, reply: FastifyReply) => {
   const { authorization } = request.headers;
-  const { userEmail } = request.params as DeleteRequest["Params"];
+  let { userEmail } = request.params as DeleteRequest["Params"];
+  if (!userEmail) {
+    userEmail = request?.body
+      ? (request.body as EditRequest["Body"]).email
+      : "";
+  }
 
   if (!authorization) {
     return reply.status(401).send({ error: "Not authenticated" });
@@ -14,6 +19,7 @@ const isUser = async (request: FastifyRequest, reply: FastifyReply) => {
   if (userEmail) {
     const decodedToken: number | string = decodeToken(authorization, "email");
 
+    console.log("\n\ndecodedToken: ", decodedToken);
     if (typeof decodedToken === "number") {
       return reply.status(401).send({ error: "Invalid or expired token" });
     }
@@ -21,7 +27,9 @@ const isUser = async (request: FastifyRequest, reply: FastifyReply) => {
     if (decodedToken !== userEmail) {
       return reply
         .status(401)
-        .send({ error: "Cannot delete a different user than yours" });
+        .send({
+          error: "Cannot edit or delete a different user than the current one",
+        });
     }
   }
 };
