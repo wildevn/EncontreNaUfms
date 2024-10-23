@@ -33,7 +33,11 @@ const logInService = async (email: string, password: string) => {
     const validPassword = await bcrypt.compare(password, user.password);
 
     if (validPassword) {
-      const tokens: Tokens = createTokens(user);
+      const tokens: Tokens = createTokens({
+        id: user.id,
+        name: user.name,
+        email: user.email,
+      });
 
       return {
         user: {
