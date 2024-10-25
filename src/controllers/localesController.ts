@@ -312,6 +312,15 @@ const listSection = async (
     const { authorization } = request.headers;
     userId = decodeToken(authorization) as number;
   }
+  if (
+    typeof localeId === "undefined" ||
+    localeId === "0" ||
+    Number.isNaN(Number.parseInt(localeId))
+  ) {
+    return reply
+      .status(400)
+      .send({ error: "Please provide a localeId in the query string" });
+  }
 
   const sectionInfo = await listSectionService(
     Number.parseInt(localeId),

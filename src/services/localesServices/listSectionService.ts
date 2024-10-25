@@ -1,5 +1,13 @@
 import { db } from "@/models/db";
-import { Histories, Locales, ScheduledHours } from "@/models/schema";
+import {
+  AcademicBlocks,
+  Histories,
+  Libraries,
+  Locales,
+  ScheduledHours,
+  Sports,
+  Transports,
+} from "@/models/schema";
 import { and } from "drizzle-orm";
 import { eq, sql } from "drizzle-orm";
 
@@ -34,6 +42,14 @@ type MoreInfo = {
   about: string;
   observation: string;
   phoneNumber: string;
+  type: number;
+  course: string;
+  libraryLink: string;
+  availableSports: string;
+  availableBuses: string;
+  rules: string;
+  createdAt?: Date;
+  updatedAt?: Date;
 };
 
 type ResultReply = {
@@ -47,6 +63,27 @@ const LocaleSections: Array<string> = [
   "hours", // 1
   "moreinfo", // 2
 ];
+
+const getTableName = (
+  type: number,
+):
+  | typeof AcademicBlocks
+  | typeof Libraries
+  | typeof Sports
+  | typeof Transports => {
+  switch (type) {
+    case 0:
+      return AcademicBlocks;
+    case 5:
+      return Libraries;
+    case 6:
+      return Sports;
+    case 7:
+      return Transports;
+    default:
+      return AcademicBlocks;
+  }
+};
 
 const sectionVerifier = (sectionId: string): number => {
   const number: number | typeof NaN = Number.parseInt(sectionId);
@@ -163,9 +200,25 @@ const listSectionService = async (
             about: Locales.about,
             observation: Locales.observation,
             phoneNumber: Locales.phoneNumber,
+            type: Locales.type,
           })
           .from(Locales)
+          .where(eq(Locales.id, localeId))
       )[0] as MoreInfo;
+
+      if (result && [0, 5, 6, 7].includes(result.type)) {
+        const tableName = getTableName(result.type);
+
+        result = {
+          ...result,
+          ...(
+            await dbConnection
+              .select()
+              .from(tableName)
+              .where(eq(tableName.localeId, localeId))
+          )[0],
+        };
+      }
 
       return { result, status: 200 };
     }
