@@ -1,5 +1,4 @@
 import type { FastifyReply, FastifyRequest } from "fastify";
-import verifyToken from "@/helpers/verifyToken";
 import type { DeleteRequest, EditRequest } from "@/controllers/usersController";
 import decodeToken from "@/helpers/decodeToken";
 
