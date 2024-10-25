@@ -1,9 +1,9 @@
-import createTokens, { type Tokens } from "@/helpers/createTokens";
 import type { User } from "@services/userServices/createOrUpdateUserService";
 import { db } from "@/models/db";
 import { Users } from "@/models/schema";
 import { eq } from "drizzle-orm";
 import sendEmail from "@/helpers/sendEmail";
+import tokenStash from "@/helpers/tokenStash";
 
 export type Reply = {
   result?: string;
@@ -30,7 +30,7 @@ const recoveryPasswordService = async (email: string): Promise<Reply> => {
       return { error: "User not found", status: 404 };
     }
 
-    const { accessToken: token }: Tokens = createTokens(user);
+    const token: number = tokenStash.generateToken(user.email);
 
     const emailSent: any = await sendEmail(user.name, email, token);
 

@@ -4,7 +4,7 @@ import { db } from "@database/db";
 import { Users } from "@database/schema";
 import { eq } from "drizzle-orm";
 import bcrypt from "bcrypt";
-import type { User } from "./createOrUpdateUserService";
+import type { User } from "../userServices/createOrUpdateUserService";
 import createTokens, { type Tokens } from "@/helpers/createTokens";
 
 interface UserWithPassword extends User {
