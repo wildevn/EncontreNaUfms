@@ -5,15 +5,18 @@ import createOrUpdateUserService, {
   type User,
   type ErrorType,
 } from "@/services/userServices/createOrUpdateUserService";
-import logInService from "@/services/userServices/logInService";
+import logInService from "@/services/authServices/logInService";
 import recoveryPasswordService, {
   type Reply,
-} from "@/services/userServices/recoveryPasswordService";
+} from "@/services/authServices/recoveryPasswordService";
 import type {
   FastifyReply,
   FastifyRequest,
   RouteShorthandOptions,
 } from "fastify";
+import tokenStash from "@/helpers/tokenStash";
+import getUserInfoService from "@/services/userServices/getUserInfoService";
+import createTokens from "@/helpers/createTokens";
 
 export type AuthRequest = {
   Body: {
@@ -36,6 +39,14 @@ export type RecoveryRequest = {
     email: string;
   };
 };
+
+export type ValidateTokenRequest = {
+  Body: {
+    email: string;
+    token: number;
+  };
+};
+
 export type TokenRequest = {
   Headers: {
     authorization: string;
@@ -84,6 +95,20 @@ export const recoveryOpts: RouteShorthandOptions = {
     },
   },
 };
+
+export const validateRecoveryTokenOpts: RouteShorthandOptions = {
+  schema: {
+    body: {
+      type: "object",
+      required: ["email", "token"],
+      properties: {
+        email: { type: "string" },
+        token: { type: "number" },
+      },
+    },
+  },
+};
+
 export const tokenOpts: RouteShorthandOptions = {
   schema: {
     headers: {
@@ -148,6 +173,39 @@ const recovery = async (
   return reply.status(result.status).send({ ...result });
 };
 
+const validateToken = async (
+  request: FastifyRequest<ValidateTokenRequest>,
+  reply: FastifyReply,
+): Promise<UserReply> => {
+  const { email, token } = request.body;
+
+  const isValid: boolean = tokenStash.tokenVerifier(token, request.body.email);
+
+  if (!isValid) {
+    return reply
+      .status(400)
+      .send({ error: "Provided token is invalid or expired" });
+  }
+
+  const result: UserReply = await getUserInfoService(email);
+
+  if ("error" in result) {
+    return reply.status(result.status).send({ error: result.error });
+  }
+
+  if (result.user) {
+    const { accessToken: newToken } = createTokens(
+      result.user ? result.user : ({ email } as User),
+    );
+
+    if (newToken) {
+      result.user.token = newToken;
+      return reply.status(result.status).send({ user: { token: newToken } });
+    }
+  }
+  return reply.status(500).send({ error: "Internal server error" });
+};
+
 const refresh = async (
   request: FastifyRequest<TokenRequest>,
   reply: FastifyReply,
@@ -192,4 +250,4 @@ const verify = async (
   return reply.status(200).send({ result: "valid token" });
 };
 
-export default { login, register, recovery, refresh, verify };
+export default { login, register, recovery, validateToken, refresh, verify };

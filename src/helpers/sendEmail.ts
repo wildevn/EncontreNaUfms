@@ -3,7 +3,7 @@ import mailjet, { defaultFrom } from "./mailjet";
 const sendEmail = async (
   userName: string,
   userEmail: string,
-  token: string,
+  token: number,
 ) => {
   // change token to a deep link with it.
   try {
