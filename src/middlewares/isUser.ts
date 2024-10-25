@@ -19,17 +19,17 @@ const isUser = async (request: FastifyRequest, reply: FastifyReply) => {
   if (userEmail) {
     const decodedToken: number | string = decodeToken(authorization, "email");
 
-    console.log("\n\ndecodedToken: ", decodedToken);
     if (typeof decodedToken === "number") {
       return reply.status(401).send({ error: "Invalid or expired token" });
     }
 
-    if (decodedToken !== userEmail) {
-      return reply
-        .status(401)
-        .send({
-          error: "Cannot edit or delete a different user than the current one",
-        });
+    if (
+      decodedToken !== userEmail &&
+      decodedToken !== process.env.ADMIN_EMAIL
+    ) {
+      return reply.status(401).send({
+        error: "Cannot edit or delete a different user than the current one",
+      });
     }
   }
 };
