@@ -1,3 +1,4 @@
+import decodeToken from "@/helpers/decodeToken";
 import isAuth from "@/middlewares/isAuth";
 import isUser from "@/middlewares/isUser";
 import createOrUpdateUserService, {
@@ -40,7 +41,6 @@ export const editOpts: RouteShorthandOptions = {
   schema: {
     body: {
       type: "object",
-      required: ["email"],
       properties: {
         name: { type: "string" },
         email: { type: "string" },
@@ -90,13 +90,28 @@ const edit = async (
   reply: FastifyReply,
 ): Promise<User | ErrorType> => {
   const { name, email, password } = request.body;
+  let user: UserReply;
 
-  const user: UserReply = await createOrUpdateUserService(
-    name,
-    email,
-    password,
-    true,
+  const userEmail = decodeToken(
+    request.headers.authorization as string,
+    "email",
   );
+
+  if (userEmail !== email && userEmail === process.env.ADMIN_EMAIL) {
+    user = await createOrUpdateUserService(
+      name,
+      email || userEmail,
+      password,
+      true,
+    );
+  } else {
+    user = await createOrUpdateUserService(
+      name,
+      userEmail as string,
+      password,
+      true,
+    );
+  }
 
   if ("error" in user) {
     return reply.status(user.status).send({ error: user.error });
