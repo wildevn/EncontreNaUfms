@@ -93,12 +93,16 @@ const createOrUpdateUserService = async (
 
     if (result?.info) {
       if (result.info.includes("Changed: 1")) {
-        const tokens = createTokens({ id: user.id, name, email });
+        const tokens = createTokens({
+          id: user.id,
+          name: name || user.name,
+          email,
+        });
 
         return {
           user: {
             id: user.id,
-            name,
+            name: name || user.name,
             email,
             token: tokens.accessToken,
             refreshToken: tokens.refreshToken,
