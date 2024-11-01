@@ -7,7 +7,7 @@ const envToLogger = {
     transport: {
       target: "pino-pretty",
       options: {
-        translateTime: "HH:MM:ss Z",
+        translateTime: "HH:MM:ss",
         ignore: "pid,hostname",
       },
     },
@@ -17,7 +17,7 @@ const envToLogger = {
 };
 
 const app = Fastify({
-  logger: envToLogger ?? true,
+  logger: envToLogger.development ?? true,
 });
 
 app.register(routes);
