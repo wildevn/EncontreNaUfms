@@ -1,4 +1,4 @@
-import { db } from "@/models/db";
+import { getDbConnection } from "@/models/db";
 import { Reviews } from "@/models/schema";
 import { eq } from "drizzle-orm";
 import { and } from "drizzle-orm";
@@ -19,10 +19,10 @@ const getReviewService = async (
   localeId: number,
   userId: number,
 ): Promise<ResultReply> => {
-  const dbConnection = await db();
+  const db = await getDbConnection();
   try {
     const review: Review = (
-      await dbConnection
+      await db
         .select({
           userId: Reviews.userId,
           localeId: Reviews.localeId,

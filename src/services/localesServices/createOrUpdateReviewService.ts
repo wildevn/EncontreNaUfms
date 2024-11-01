@@ -1,4 +1,4 @@
-import { db } from "@/models/db";
+import { getDbConnection } from "@/models/db";
 import { Reviews } from "@/models/schema";
 import { eq } from "drizzle-orm";
 import { and } from "drizzle-orm";
@@ -24,12 +24,12 @@ const createOrUpdateReviewService = async (
   userId: number,
   grade: string,
 ): Promise<ResultReply> => {
-  const dbConnection = await db();
+  const db = await getDbConnection();
   try {
     const date = new Date();
     let result: ResultAction | undefined;
     const review = (
-      await dbConnection
+      await db
         .select({
           userId: Reviews.userId,
           localeId: Reviews.localeId,
@@ -40,7 +40,7 @@ const createOrUpdateReviewService = async (
 
     if (review) {
       result = (
-        await dbConnection
+        await db
           .update(Reviews)
           .set({ grade, updatedAt: date })
           .where(
@@ -49,7 +49,7 @@ const createOrUpdateReviewService = async (
       )[0] as ResultAction;
     } else {
       result = (
-        await dbConnection.insert(Reviews).values({
+        await db.insert(Reviews).values({
           userId,
           localeId,
           grade,

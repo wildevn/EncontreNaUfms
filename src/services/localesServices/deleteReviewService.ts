@@ -1,4 +1,4 @@
-import { db } from "@/models/db";
+import { getDbConnection } from "@/models/db";
 import { Reviews } from "@/models/schema";
 import { eq } from "drizzle-orm";
 import { and } from "drizzle-orm";
@@ -21,11 +21,11 @@ const deleteReviewService = async (
   localeId: number,
   userId: number,
 ): Promise<ResultReply> => {
-  const dbConnection = await db();
+  const db = await getDbConnection();
 
   try {
     const review: Review = (
-      await dbConnection
+      await db
         .select({
           grade: Reviews.grade,
         })
@@ -41,7 +41,7 @@ const deleteReviewService = async (
     }
 
     const result: ResultAction = (
-      await dbConnection
+      await db
         .delete(Reviews)
         .where(and(eq(Reviews.localeId, localeId), eq(Reviews.userId, userId)))
     )[0] as ResultAction;

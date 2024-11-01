@@ -1,9 +1,9 @@
 import type { User } from "@services/userServices/createOrUpdateUserService";
-import { db } from "@/models/db";
+import { getDbConnection } from "@/models/db";
 import { Users } from "@/models/schema";
 import { eq } from "drizzle-orm";
 import sendEmail from "@/helpers/sendEmail";
-import tokenStash from "@/helpers/tokenStash";
+import tokenStash from "@/helpers/TokenStash";
 
 export type Reply = {
   result?: string;
@@ -12,11 +12,11 @@ export type Reply = {
 };
 
 const recoveryPasswordService = async (email: string): Promise<Reply> => {
-  const dbConnection = await db();
+  const db = await getDbConnection();
 
   try {
     const user: User = (
-      await dbConnection
+      await db
         .select({
           id: Users.id,
           name: Users.name,

@@ -1,5 +1,5 @@
 // Responsible to return user information
-import { db } from "@database/db";
+import { getDbConnection } from "@database/db";
 import { Users } from "@database/schema";
 import { eq } from "drizzle-orm";
 
@@ -15,9 +15,9 @@ type UserReply = {
   status: number;
 };
 const getUserInfoService = async (email: string): Promise<UserReply> => {
-  const dbConnection = await db();
+  const db = await getDbConnection();
   const user: User = (
-    await dbConnection
+    await db
       .select({
         id: Users.id,
         name: Users.name,

@@ -1,4 +1,4 @@
-import { db } from "@/models/db";
+import { getDbConnection } from "@/models/db";
 import { Locales } from "@/models/schema";
 import { eq } from "drizzle-orm";
 import type { Result } from "@/services/localesServices/createLocaleService";
@@ -6,9 +6,9 @@ import type { ResultAction } from "./createOrUpdateReviewService";
 
 const deleteLocaleService = async (localeId: number): Promise<Result> => {
   try {
-    const dbConnection = await db();
+    const db = await getDbConnection();
     const result = (
-      await dbConnection.delete(Locales).where(eq(Locales.id, localeId))
+      await db.delete(Locales).where(eq(Locales.id, localeId))
     )[0] as ResultAction;
 
     if (result && "affectedRows" in result && result.affectedRows === 1) {

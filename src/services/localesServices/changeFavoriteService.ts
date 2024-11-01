@@ -1,4 +1,4 @@
-import { db } from "@database/db";
+import { getDbConnection } from "@database/db";
 import { Favorites } from "@database/schema";
 import { and } from "drizzle-orm";
 import { eq } from "drizzle-orm";
@@ -18,12 +18,12 @@ export type FavoriteReply = {
   status: number;
 };
 const changeFavoriteService = async (localeId: number, userId: number) => {
-  const dbConnection = await db();
+  const db = await getDbConnection();
   let result: ResultAction | undefined;
 
   try {
     const locale: Favorite = (
-      await dbConnection
+      await db
         .select({
           localeId: Favorites.localeId,
           userId: Favorites.userId,
@@ -36,7 +36,7 @@ const changeFavoriteService = async (localeId: number, userId: number) => {
 
     if (locale) {
       result = (
-        await dbConnection
+        await db
           .delete(Favorites)
           .where(
             and(eq(Favorites.localeId, localeId), eq(Favorites.userId, userId)),
@@ -45,7 +45,7 @@ const changeFavoriteService = async (localeId: number, userId: number) => {
     } else {
       const date = new Date();
       result = (
-        await dbConnection.insert(Favorites).values({
+        await db.insert(Favorites).values({
           localeId: localeId,
           userId: userId,
           createdAt: date,

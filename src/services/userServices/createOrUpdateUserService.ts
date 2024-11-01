@@ -1,6 +1,6 @@
 // Responsible to search if the user is already regi
 
-import { db } from "@database/db";
+import { getDbConnection } from "@database/db";
 import { Users } from "@database/schema";
 import { eq } from "drizzle-orm";
 import bcrypt from "bcrypt";
@@ -48,11 +48,11 @@ const createOrUpdateUserService = async (
   password: string,
   editUser?: boolean,
 ): Promise<UserReply> => {
-  const dbConnection = await db();
+  const db = await getDbConnection();
   let hashedPassword: string | { error: string } = "";
 
   const user = (
-    await dbConnection
+    await db
       .select({
         id: Users.id,
         name: Users.name,
@@ -85,10 +85,7 @@ const createOrUpdateUserService = async (
     }
 
     const result: { info?: string } = (
-      await dbConnection
-        .update(Users)
-        .set(setNewData)
-        .where(eq(Users.email, email))
+      await db.update(Users).set(setNewData).where(eq(Users.email, email))
     )[0];
 
     if (result?.info) {
@@ -126,7 +123,7 @@ const createOrUpdateUserService = async (
   }
 
   const newUser = (
-    await dbConnection
+    await db
       .insert(Users)
       .values({
         name,

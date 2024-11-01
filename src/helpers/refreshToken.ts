@@ -1,5 +1,5 @@
 import type { User } from "@/services/userServices/createOrUpdateUserService";
-import { db } from "@database/db";
+import { getDbConnection } from "@database/db";
 import { Users } from "@database/schema";
 import { eq } from "drizzle-orm";
 import { decode, sign, type JwtPayload } from "jsonwebtoken";
@@ -19,7 +19,7 @@ export type NewTokenReply = {
 };
 
 const refreshToken = async (token: string): Promise<NewTokenReply> => {
-  const dbConnection = await db();
+  const db = await getDbConnection();
   const decodedToken: DecodedToken | string | JwtPayload | null = decode(token);
 
   if (
@@ -28,7 +28,7 @@ const refreshToken = async (token: string): Promise<NewTokenReply> => {
     "id" in decodedToken
   ) {
     const user = (
-      await dbConnection
+      await db
         .select({
           id: Users.id,
           name: Users.name,

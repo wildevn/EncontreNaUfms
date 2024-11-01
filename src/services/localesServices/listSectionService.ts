@@ -1,4 +1,4 @@
-import { db } from "@/models/db";
+import { getDbConnection } from "@/models/db";
 import {
   AcademicBlocks,
   Histories,
@@ -103,7 +103,7 @@ const listSectionService = async (
   sectionId: string,
 ): Promise<ResultReply | undefined> => {
   let result: Localization[] | Hours | MoreInfo | undefined;
-  const dbConnection = await db();
+  const db = await getDbConnection();
   const index: number = sectionVerifier(sectionId);
 
   if (index === -1) {
@@ -115,7 +115,7 @@ const listSectionService = async (
       if (userId > 0) {
         const alreadyVisited: boolean =
           (
-            await dbConnection
+            await db
               .select()
               .from(Histories)
               .where(
@@ -128,7 +128,7 @@ const listSectionService = async (
         const date = new Date();
         try {
           if (alreadyVisited) {
-            await dbConnection
+            await db
               .update(Histories)
               .set({ updatedAt: new Date() })
               .where(
@@ -138,7 +138,7 @@ const listSectionService = async (
                 ),
               );
           } else {
-            await dbConnection.insert(Histories).values({
+            await db.insert(Histories).values({
               userId,
               localeId,
               createdAt: date,
@@ -151,7 +151,7 @@ const listSectionService = async (
       }
 
       result = (
-        await dbConnection.execute(sql`
+        await db.execute(sql`
         SELECT 
           locale.id,
           locale.name,
@@ -178,7 +178,7 @@ const listSectionService = async (
     }
     if (index === 1) {
       result = (
-        await dbConnection
+        await db
           .select({
             sundayHours: ScheduledHours.sundayHours,
             mondayHours: ScheduledHours.mondayHours,
@@ -195,7 +195,7 @@ const listSectionService = async (
     }
     if (index === 2) {
       result = (
-        await dbConnection
+        await db
           .select({
             about: Locales.about,
             observation: Locales.observation,
@@ -212,7 +212,7 @@ const listSectionService = async (
         result = {
           ...result,
           ...(
-            await dbConnection
+            await db
               .select()
               .from(tableName)
               .where(eq(tableName.localeId, localeId))

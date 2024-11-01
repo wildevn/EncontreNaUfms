@@ -1,4 +1,4 @@
-import { db } from "@/models/db";
+import { getDbConnection } from "@/models/db";
 import {
   AcademicBlocks,
   Libraries,
@@ -170,7 +170,7 @@ const updateLocaleService = async (
   locale: EditLocale,
   localeId: number,
 ): Promise<EditResult> => {
-  const dbConnection = await db();
+  const db = await getDbConnection();
   const { photos, schedule, specialInfo, ...basicLocaleInfo } = locale;
   const date = new Date();
   let basicInfoResult: ResultAction;
@@ -182,7 +182,7 @@ const updateLocaleService = async (
     // check if every information needed is here or not.
     // await dbConnection
     const localeRow = (
-      await dbConnection.select().from(Locales).where(eq(Locales.id, localeId))
+      await db.select().from(Locales).where(eq(Locales.id, localeId))
     )[0];
     const result: ResultObject = {} as ResultObject;
 
@@ -200,7 +200,7 @@ const updateLocaleService = async (
             basicLocaleInfo.localizationLink || localeRow.localizationLink;
 
           basicInfoResult = (
-            await dbConnection
+            await db
               .update(Locales)
               .set({ ...basicLocaleInfo, updatedAt: date })
               .where(eq(Locales.id, localeId))
@@ -224,7 +224,7 @@ const updateLocaleService = async (
       if (schedule) {
         try {
           const doesScheduleExist = (
-            await dbConnection
+            await db
               .select()
               .from(ScheduledHours)
               .where(eq(ScheduledHours.localeId, localeId))
@@ -245,14 +245,14 @@ const updateLocaleService = async (
             };
 
             scheduleResult = (
-              await dbConnection
+              await db
                 .update(ScheduledHours)
                 .set({ localeId: localeId, ...scheduleRow, updatedAt: date })
                 .where(eq(ScheduledHours.localeId, localeId))
             )[0];
           } else {
             scheduleResult = (
-              await dbConnection.insert(ScheduledHours).values({
+              await db.insert(ScheduledHours).values({
                 localeId: localeId,
                 mondayHours: schedule.monday || "",
                 tuesdayHours: schedule.tuesday || "",
@@ -291,9 +291,7 @@ const updateLocaleService = async (
           );
           try {
             specialInfoResult = (
-              await dbConnection
-                .delete(tableName)
-                .where(eq(tableName.localeId, localeId))
+              await db.delete(tableName).where(eq(tableName.localeId, localeId))
             )[0];
           } catch (error) {
             console.log(error);
@@ -318,21 +316,21 @@ const updateLocaleService = async (
           );
 
           try {
-            const doesSpecialInfoExist = await dbConnection
+            const doesSpecialInfoExist = await db
               .select()
               .from(tableName)
               .where(eq(tableName.localeId, localeId));
 
             if (doesSpecialInfoExist.length > 0) {
               specialInfoResult = (
-                await dbConnection
+                await db
                   .update(tableName)
                   .set({ ...newSpecialInfo, updatedAt: date })
                   .where(eq(tableName.localeId, localeId))
               )[0];
             } else {
               specialInfoResult = (
-                await dbConnection.insert(tableName).values({
+                await db.insert(tableName).values({
                   ...newSpecialInfo,
                   createdAt: date,
                   updatedAt: date,

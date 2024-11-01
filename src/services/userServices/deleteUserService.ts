@@ -1,15 +1,15 @@
-import { db } from "@/models/db";
+import { getDbConnection } from "@/models/db";
 import { Users } from "@/models/schema";
 import { eq } from "drizzle-orm";
 import type { Result } from "../localesServices/createLocaleService";
 import type { ResultAction } from "../localesServices/createOrUpdateReviewService";
 
 const deleteUserService = async (email: string): Promise<Result> => {
-  const dbConnection = await db();
+  const db = await getDbConnection();
 
   try {
     const result = (
-      await dbConnection.delete(Users).where(eq(Users.email, email))
+      await db.delete(Users).where(eq(Users.email, email))
     )[0] as ResultAction;
 
     if ("affectedRows" in result && result.affectedRows === 1) {

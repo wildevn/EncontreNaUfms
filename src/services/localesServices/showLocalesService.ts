@@ -1,6 +1,6 @@
 // Responsible to list the basic data to display on the list
 // TODO: Connect on DB, get all data and return
-import { db } from "@database/db";
+import { getDbConnection } from "@database/db";
 import { Favorites, Locales, Photos, ScheduledHours } from "@database/schema";
 import { like } from "drizzle-orm";
 import { or, type SQL } from "drizzle-orm";
@@ -130,7 +130,7 @@ const showLocalesService = async (
   categoryList: Array<string>,
   searchParam: string,
 ): Promise<Data | LocaleError> => {
-  const dbConnection = await db();
+  const db = await getDbConnection();
   const categories = categoryVerifier(categoryList);
   if (pageNumber < 1 || limit < 1) {
     return { error: "pageNumber and / or limit must be greater than 0" };
@@ -163,7 +163,7 @@ const showLocalesService = async (
     }
   }
 
-  const locales: LocaleRow[] = (await dbConnection
+  const locales: LocaleRow[] = (await db
     .select({
       id: Locales.id,
       name: Locales.name,
@@ -183,7 +183,7 @@ const showLocalesService = async (
     .limit(limit)
     .offset(limit * (pageNumber - 1))) as LocaleRow[];
 
-  const scheduleRows: ScheduledHoursRow[] = await dbConnection
+  const scheduleRows: ScheduledHoursRow[] = await db
     .select({
       localeId: ScheduledHours.localeId,
       sundayHours: ScheduledHours.sundayHours,
@@ -212,12 +212,12 @@ const showLocalesService = async (
 
   const totalItems: number = Array.isArray(categories)
     ? (
-        await dbConnection
+        await db
           .select({ count: count() })
           .from(Locales)
           .where(inArray(Locales.type, categories))
       )[0].count
-    : (await dbConnection.select({ count: count() }).from(Locales).where(where))[0].count;
+    : (await db.select({ count: count() }).from(Locales).where(where))[0].count;
 
   return {
     locales,

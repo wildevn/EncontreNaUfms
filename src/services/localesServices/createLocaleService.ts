@@ -1,4 +1,4 @@
-import { db } from "@/models/db";
+import { getDbConnection } from "@/models/db";
 import {
   AcademicBlocks,
   Libraries,
@@ -159,7 +159,7 @@ const getSpecialInfo = (
 };
 
 const createLocaleService = async (locale: Locale): Promise<Result> => {
-  const dbConnection = await db();
+  const db = await getDbConnection();
   const { photos, schedule, specialInfo, ...basicLocaleInfo } = locale;
   const date = new Date();
   let result: { id: number } | undefined | ResultAction;
@@ -173,7 +173,7 @@ const createLocaleService = async (locale: Locale): Promise<Result> => {
     basicLocaleInfo.updatedAt = date;
 
     result = (
-      await dbConnection.insert(Locales).values(basicLocaleInfo).$returningId()
+      await db.insert(Locales).values(basicLocaleInfo).$returningId()
     )[0];
 
     if (result && "id" in result) {
@@ -181,7 +181,7 @@ const createLocaleService = async (locale: Locale): Promise<Result> => {
         for (const photo of photos) {
           try {
             const photoId = (
-              await dbConnection
+              await db
                 .insert(Photos)
                 .values({
                   localeId: result.id,
@@ -199,7 +199,7 @@ const createLocaleService = async (locale: Locale): Promise<Result> => {
       }
       if (schedule) {
         try {
-          await dbConnection.insert(ScheduledHours).values({
+          await db.insert(ScheduledHours).values({
             localeId: result.id,
             mondayHours: schedule.monday || "",
             tuesdayHours: schedule.tuesday || "",
@@ -223,7 +223,7 @@ const createLocaleService = async (locale: Locale): Promise<Result> => {
             result.id,
           );
           try {
-            await dbConnection.insert(tableName).values(newSpecialInfo);
+            await db.insert(tableName).values(newSpecialInfo);
           } catch (error) {
             console.log(error);
           }

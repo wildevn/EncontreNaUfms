@@ -1,13 +1,13 @@
-import { db } from "@/models/db";
+import { getDbConnection } from "@/models/db";
 import { Photos } from "@/models/schema";
 import fs from "node:fs";
 
 const teste = async () => {
-  const dbConnection = await db();
+  const db = await getDbConnection();
 
   const image = fs.readFileSync("./Logo.jpeg");
   const result = (
-    await dbConnection.insert(Photos).values({
+    await db.insert(Photos).values({
       localeId: 1,
       name: "Logo2.jpeg",
       data: image.toString("base64"),

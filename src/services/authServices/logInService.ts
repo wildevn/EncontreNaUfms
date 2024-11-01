@@ -1,6 +1,6 @@
 // Responsible to search if the user is already regi
 
-import { db } from "@database/db";
+import { getDbConnection } from "@database/db";
 import { Users } from "@database/schema";
 import { eq } from "drizzle-orm";
 import bcrypt from "bcrypt";
@@ -12,10 +12,10 @@ interface UserWithPassword extends User {
 }
 
 const logInService = async (email: string, password: string) => {
-  const dbConnection = await db();
+  const db = await getDbConnection();
 
   const user = (
-    await dbConnection
+    await db
       .select({
         id: Users.id,
         name: Users.name,
