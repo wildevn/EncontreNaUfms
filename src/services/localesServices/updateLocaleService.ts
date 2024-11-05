@@ -27,7 +27,7 @@ export type EditLocale = {
   updatedAt: Date;
   photos?: Array<{
     name: string;
-    data: string;
+    url: string;
   }>;
   schedule?: {
     monday: string;

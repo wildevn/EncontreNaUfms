@@ -22,7 +22,7 @@ type Localization = {
   photos: Array<{
     id: number;
     name: string;
-    data: string;
+    url: string;
   }>;
   grade: number;
   favorite: boolean;
@@ -160,7 +160,7 @@ const listSectionService = async (
           locale.latitude,
           locale.longitude,
           locale.accessibility,
-          json_arrayagg(json_object('id', photo.id, 'name', photo.name, 'data', photo.data)) as photos,
+          json_arrayagg(json_object('id', photo.id, 'name', photo.name, 'url', photo.url)) as photos,
           locale.grade,
           CASE WHEN favorite.localeId = locale.id AND favorite.userId = ${userId} THEN true ELSE false END as favorite
         FROM 
@@ -173,6 +173,10 @@ const listSectionService = async (
           locale.id = ${localeId}
         `)
       )[0] as unknown as Localization[];
+
+      // if (result[0]) {
+      //   console.log("\n\nresult: ", result[0].photos);
+      // }
 
       return { result: result[0], status: 200 };
     }

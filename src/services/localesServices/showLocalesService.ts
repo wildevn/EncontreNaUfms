@@ -14,7 +14,7 @@ export type LocaleRow = {
     | {
         id: number;
         name: string;
-        data: string;
+        url: string;
       }
     | unknown;
   type: number;
@@ -168,7 +168,7 @@ const showLocalesService = async (
       id: Locales.id,
       name: Locales.name,
       address: Locales.address,
-      mainPhoto: sql`(SELECT json_object('id', photo.id, 'name', photo.name, 'data', photo.data) FROM Photos as photo WHERE photo.localeId = ${Locales.id} ORDER BY photo.id ASC LIMIT 1)`,
+      mainPhoto: sql`(SELECT json_object('id', photo.id, 'name', photo.name, 'url', photo.url) FROM Photos as photo WHERE photo.localeId = ${Locales.id} ORDER BY photo.id ASC LIMIT 1)`,
       type: Locales.type,
       favorite: sql`CASE WHEN ${Favorites.localeId} = ${Locales.id} AND ${Favorites.userId} = ${userId} THEN true ELSE false END`,
       grade: Locales.grade,

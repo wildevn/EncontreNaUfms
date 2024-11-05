@@ -25,7 +25,7 @@ export type Locale = {
   updatedAt: Date;
   photos?: Array<{
     name: string;
-    data: string;
+    url: string;
   }>;
   schedule?: {
     monday: string;
@@ -186,7 +186,7 @@ const createLocaleService = async (locale: Locale): Promise<Result> => {
                 .values({
                   localeId: result.id,
                   name: photo.name,
-                  data: photo.data,
+                  url: photo.url,
                   createdAt: date,
                   updatedAt: date,
                 })
