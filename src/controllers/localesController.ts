@@ -131,7 +131,7 @@ export const insertLocaleOtps: RouteShorthandOptions = {
                 type: "object",
                 properties: {
                   name: { type: "string" },
-                  url: { type: "string" },
+                  data: { type: "string" },
                 },
               },
             },
@@ -207,7 +207,7 @@ export const editLocaleOtps: RouteShorthandOptions = {
                 type: "object",
                 properties: {
                   name: { type: "string" },
-                  url: { type: "string" },
+                  data: { type: "string" },
                 },
               },
             },

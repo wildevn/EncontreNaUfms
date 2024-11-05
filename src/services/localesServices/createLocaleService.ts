@@ -9,6 +9,7 @@ import {
   Transports,
 } from "@/models/schema";
 import type { ResultAction } from "./createOrUpdateReviewService";
+import fs from "node:fs";
 
 export type Locale = {
   name: string;
@@ -25,7 +26,7 @@ export type Locale = {
   updatedAt: Date;
   photos?: Array<{
     name: string;
-    url: string;
+    data: string;
   }>;
   schedule?: {
     monday: string;
@@ -180,13 +181,18 @@ const createLocaleService = async (locale: Locale): Promise<Result> => {
       if (photos) {
         for (const photo of photos) {
           try {
+            const newPhotoUrl = `/public/${photo.name}_${date.getTime()}`;
+            fs.writeFileSync(`.${newPhotoUrl}`, photo.data, {
+              encoding: "base64",
+            });
+
             const photoId = (
               await db
                 .insert(Photos)
                 .values({
                   localeId: result.id,
                   name: photo.name,
-                  url: photo.url,
+                  url: photo.data,
                   createdAt: date,
                   updatedAt: date,
                 })
