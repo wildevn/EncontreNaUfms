@@ -19,6 +19,7 @@ import updateLocaleService, {
   type EditLocale,
 } from "@/services/localesServices/updateLocaleService";
 import deleteLocaleService from "@/services/localesServices/deleteLocaleService";
+import verifyToken from "@/helpers/verifyToken";
 // import updateLocaleService from "@/services/localesServices/UpdateLocaleService";
 // import { request } from "node:http";
 
@@ -269,10 +270,12 @@ const list = async (
   const { categoryList } = request.params;
   const { searchParam, pageNumber, limit } = request.query;
   let userId = 0;
+  let isValid = -1;
 
   if ("authorization" in request.headers && request.headers.authorization) {
     const { authorization } = request.headers;
     userId = decodeToken(authorization) as number;
+    isValid = verifyToken(authorization, "access") ? 1 : 0;
   }
 
   if (pageNumber && limit) {
@@ -293,7 +296,8 @@ const list = async (
     if ("error" in data) {
       return reply.status(400).send({ error: { message: data.error } });
     }
-    return reply.status(200).send({ data });
+
+    return reply.status(isValid === -1 || isValid ? 200 : 401).send({ data });
   }
   const message: string = `Check parameter(s): ${pageNumber ? "" : "pageNumber,"} 
                             ${limit ? "" : "limit"}`;
@@ -307,10 +311,12 @@ const listSection = async (
   const { localeId } = request.params;
   const { sectionId } = request.query;
   let userId = 0;
+  let isValid = -1;
 
   if ("authorization" in request.headers && request.headers.authorization) {
     const { authorization } = request.headers;
     userId = decodeToken(authorization) as number;
+    isValid = verifyToken(authorization, "access") ? 1 : 0;
   }
   if (
     typeof localeId === "undefined" ||
@@ -334,7 +340,9 @@ const listSection = async (
         .status(sectionInfo.status)
         .send({ error: sectionInfo.error });
     }
-    return reply.status(sectionInfo.status).send({ data: sectionInfo.result });
+    return reply
+      .status(isValid === -1 || isValid ? sectionInfo.status : 401)
+      .send({ data: sectionInfo.result });
   }
   return reply
     .status(500)
