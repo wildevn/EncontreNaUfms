@@ -220,7 +220,15 @@ const showLocalesService = async (
     : (await db.select({ count: count() }).from(Locales).where(where))[0].count;
 
   return {
-    locales,
+    locales: locales.sort((a, b) => {
+      if (a.favorite && !b.favorite) {
+        return -1;
+      }
+      if (!a.favorite && b.favorite) {
+        return 1;
+      }
+      return 0;
+    }),
     totalItems,
   };
 };
