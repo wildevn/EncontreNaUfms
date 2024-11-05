@@ -181,7 +181,7 @@ const createLocaleService = async (locale: Locale): Promise<Result> => {
       if (photos) {
         for (const photo of photos) {
           try {
-            const newPhotoUrl = `/public/${photo.name}_${date.getTime()}`;
+            const newPhotoUrl = `/public/${date.getTime()}_${photo.name}`;
             fs.writeFileSync(`.${newPhotoUrl}`, photo.data, {
               encoding: "base64",
             });
@@ -192,7 +192,7 @@ const createLocaleService = async (locale: Locale): Promise<Result> => {
                 .values({
                   localeId: result.id,
                   name: photo.name,
-                  url: photo.data,
+                  url: newPhotoUrl,
                   createdAt: date,
                   updatedAt: date,
                 })

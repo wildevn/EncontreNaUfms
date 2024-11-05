@@ -7,8 +7,6 @@ const teste = async () => {
 
   const image = fs.readFileSync("./automatic.png");
 
-  console.log("meu Deusssssssss: ", image.toString("base64"));
-
   fs.writeFileSync("./public/automatic2.png", image.toString("base64"), {
     encoding: "base64",
   });
