@@ -1,6 +1,8 @@
 import "./bootstrap";
 import Fastify from "fastify";
+import fastifyStatic from "@fastify/static";
 import routes from "@routes/routes";
+import path from "node:path";
 
 const envToLogger = {
   development: {
@@ -18,6 +20,11 @@ const envToLogger = {
 
 const app = Fastify({
   logger: envToLogger.development ?? true,
+});
+
+app.register(fastifyStatic, {
+  root: path.join(__dirname.replace("src", ""), "public"),
+  prefix: "/public/",
 });
 
 app.register(routes);
