@@ -275,7 +275,7 @@ const list = async (
   if ("authorization" in request.headers && request.headers.authorization) {
     const { authorization } = request.headers;
     userId = decodeToken(authorization) as number;
-    isValid = verifyToken(authorization, "access") ? 1 : 0;
+    isValid = userId ? 1 : 0;
   }
 
   if (pageNumber && limit) {
@@ -297,7 +297,7 @@ const list = async (
       return reply.status(400).send({ error: { message: data.error } });
     }
 
-    return reply.status(isValid === -1 || isValid ? 200 : 401).send({ data });
+    return reply.status(isValid === 0 ? 401 : 200).send({ data });
   }
   const message: string = `Check parameter(s): ${pageNumber ? "" : "pageNumber,"} 
                             ${limit ? "" : "limit"}`;
@@ -316,7 +316,7 @@ const listSection = async (
   if ("authorization" in request.headers && request.headers.authorization) {
     const { authorization } = request.headers;
     userId = decodeToken(authorization) as number;
-    isValid = verifyToken(authorization, "access") ? 1 : 0;
+    isValid = userId ? 1 : 0;
   }
   if (
     typeof localeId === "undefined" ||
@@ -341,7 +341,7 @@ const listSection = async (
         .send({ error: sectionInfo.error });
     }
     return reply
-      .status(isValid === -1 || isValid ? sectionInfo.status : 401)
+      .status(isValid === 0 ? 401 : sectionInfo.status)
       .send({ data: sectionInfo.result });
   }
   return reply
