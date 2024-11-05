@@ -59,7 +59,7 @@ export const Photos = mysqlTable("Photos", {
     .references(() => Locales.id, { onDelete: "cascade", onUpdate: "cascade" })
     .unique(),
   name: varchar("name", { length: 255 }).notNull(),
-  data: varbinary("data", { length: 15900000 }).notNull(),
+  url: text("url").notNull(),
   createdAt: date("createdAt").notNull(),
   updatedAt: date("updatedAt").notNull(),
 });

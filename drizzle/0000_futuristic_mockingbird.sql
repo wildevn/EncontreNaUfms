@@ -53,7 +53,7 @@ CREATE TABLE `Photos` (
 	`id` int AUTO_INCREMENT NOT NULL,
 	`localeId` int NOT NULL,
 	`name` varchar(255) NOT NULL,
-	`data` mediumblob NOT NULL,
+	`url` text NOT NULL,
 	`createdAt` date NOT NULL,
 	`updatedAt` date NOT NULL,
 	CONSTRAINT `Photos_id` PRIMARY KEY(`id`),

@@ -375,9 +375,9 @@
           "notNull": true,
           "autoincrement": false
         },
-        "data": {
-          "name": "data",
-          "type": "varbinary(64200)",
+        "url": {
+          "name": "url",
+          "type": "text",
           "primaryKey": false,
           "notNull": true,
           "autoincrement": false
