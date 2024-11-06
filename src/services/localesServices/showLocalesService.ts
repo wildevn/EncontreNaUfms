@@ -61,7 +61,7 @@ export const scheduleAttributes = [
 
 export const LocaleTypes: Array<string> = [
   "academicblocks", // 0
-  "touristspoints", // 1
+  "touristicpoints", // 1
   "banks", // 2
   "restaurants", // 3
   "healthservices", // 4
