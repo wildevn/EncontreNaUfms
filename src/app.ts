@@ -20,6 +20,7 @@ const envToLogger = {
 
 const app = Fastify({
   logger: envToLogger.development ?? true,
+  bodyLimit: 10048576,
 });
 
 app.register(fastifyStatic, {
