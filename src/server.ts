@@ -1,16 +1,18 @@
-import Fastify from 'fastify'
+import "module-alias/register";
+import app from "./app";
 
-const fastify = Fastify({
-    logger: true
-})
+const server = async () => {
+  const port = process.env.SERVER_PORT
+    ? Number.parseInt(process.env.SERVER_PORT)
+    : 4001;
 
-fastify.get('/', (request, reply) => {
-    reply.send({ hello: 'world' });
-})
-
-fastify.listen({ port: 4000 }, (err, address) => {
-    if(err) {
-        fastify.log.error(err)
-        process.exit(1)
+  app.listen({ port: port, host: '0.0.0.0' }, (err, address) => {
+    if (err) {
+      app.log.error(err);
+      process.exit(1);
     }
-})
+    console.log(`Server listening on ${address}`);
+  });
+};
+
+server();
