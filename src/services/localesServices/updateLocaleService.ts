@@ -26,6 +26,7 @@ export type EditLocale = {
   accessibility?: number;
   updatedAt: Date;
   photos?: Array<{
+    id: number;
     name: string;
     data: string;
   }>;

@@ -14,7 +14,7 @@ import type {
   FastifyRequest,
   RouteShorthandOptions,
 } from "fastify";
-import tokenStash from "@/helpers/tokenStash";
+import tokenStash from "@/helpers/TokenStash";
 import getUserInfoService from "@/services/userServices/getUserInfoService";
 import createTokens from "@/helpers/createTokens";
 
@@ -179,7 +179,7 @@ const validateToken = async (
 ): Promise<UserReply> => {
   const { email, token } = request.body;
 
-  const isValid: boolean = tokenStash.tokenVerifier(token, request.body.email);
+  const isValid: boolean = tokenStash.tokenVerifier(token, email);
 
   if (!isValid) {
     return reply
