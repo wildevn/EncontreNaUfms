@@ -348,8 +348,7 @@ const updateLocaleService = async (
           }
         }
         if (
-          (basicLocaleInfo.type &&
-            typeof basicLocaleInfo.type === "number" &&
+          (typeof basicLocaleInfo?.type === "number" &&
             [0, 5, 6, 7].includes(basicLocaleInfo.type)) ||
           (typeof basicLocaleInfo?.type !== "number" &&
             [0, 5, 6, 7].includes(localeRow.type))
@@ -388,7 +387,6 @@ const updateLocaleService = async (
               )[0];
             }
           } catch (error) {
-            console.log(error);
             result.specialInfo = "failed to update";
           }
         }
