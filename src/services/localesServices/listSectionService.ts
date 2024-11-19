@@ -305,7 +305,7 @@ const listSectionService = async (
         )[0] as MoreInfo;
       }
 
-      console.log("\n\nprintando o resultado: ", result);
+      return { result: result[0], status: 200 };
     }
   } catch (error) {
     if (error instanceof Error) {
