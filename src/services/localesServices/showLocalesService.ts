@@ -87,7 +87,6 @@ export const isOpenned = (scheduleRow: ScheduledHoursRow): number => {
     ? scheduleHour.split("-")
     : [];
 
-  console.log("scheduleRow", scheduleRow);
   if (scheduleHourArray && scheduleHourArray.length === 2) {
     const startMinutes: number = reduceHours(scheduleHourArray[0].split(":"));
     const endHMinutes: number = reduceHours(scheduleHourArray[1].split(":"));

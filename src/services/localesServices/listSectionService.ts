@@ -294,15 +294,15 @@ const listSectionService = async (
           .where(eq(ScheduledHours.localeId, localeId))
       )[0] as Hours;
 
-      if (result[0]?.type && [0, 5, 6, 7].includes(result[0].type)) {
-        const tableName = getTableName(result[0].type);
+      if ([0, 5, 6, 7].includes(result[0].type as number)) {
+        const tableName = getTableName(result[0].type as number);
 
         result[0].specialInfo = (
           await db
             .select()
             .from(tableName)
             .where(eq(tableName.localeId, localeId))
-        )[0] as MoreInfo;
+        )[0] as unknown as MoreInfo;
       }
 
       return { result: result[0], status: 200 };
