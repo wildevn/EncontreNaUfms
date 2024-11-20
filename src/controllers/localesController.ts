@@ -188,7 +188,7 @@ export const editLocaleOtps: RouteShorthandOptions = {
       required: ["locale"],
       properties: {
         locale: {
-          type: "object",
+          type: ["object", "null"],
           properties: {
             // basic info for a locale
             name: { type: "string" },
@@ -203,7 +203,7 @@ export const editLocaleOtps: RouteShorthandOptions = {
             accessibility: { type: "boolean" },
 
             photos: {
-              type: "array",
+              type: ["array", "null"],
               items: {
                 type: "object",
                 properties: {
@@ -214,7 +214,7 @@ export const editLocaleOtps: RouteShorthandOptions = {
             },
 
             schedule: {
-              type: "object",
+              type: ["object", "null"],
               properties: {
                 monday: { type: "string" },
                 tuesday: { type: "string" },
@@ -228,7 +228,7 @@ export const editLocaleOtps: RouteShorthandOptions = {
 
             // for specific types (AcademicBlocks, Libraries, Sports, Transports)
             specialInfo: {
-              type: "object",
+              type: ["object", "null"],
               properties: {
                 course: { type: "string" },
                 libraryLink: { type: "string" },
