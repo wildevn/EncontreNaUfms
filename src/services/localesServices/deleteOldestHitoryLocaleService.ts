@@ -9,14 +9,11 @@ const deleteOldestHitoryLocaleService = async (
 ) => {
   const db = await getDbConnection();
   const date = new Date();
-  // console.log("userId: ", userId);
-  // console.log("localeId: ", localeId);
 
   const viewdLocales = await db
     .select()
     .from(Histories)
     .where(eq(Histories.userId, userId));
-  // console.log("\n\n, viewdLocales: ", viewdLocales);
 
   const alreadyVisited: boolean =
     viewdLocales.length > 0 &&
