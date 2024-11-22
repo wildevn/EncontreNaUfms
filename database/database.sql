@@ -14,9 +14,9 @@ CREATE TABLE `Users` (
 CREATE TABLE `Locales` (
     `id` int NOT NULL AUTO_INCREMENT PRIMARY KEY,
     `name` varchar(255) NOT NULL,
-    `localizationLink` varchar(255) NOT NULL,
-    `latitude` decimal(10, 3) NOT NULL,
-    `longitude` decimal(10, 3) NOT NULL,
+    `localizationLink` varchar(511) NOT NULL,
+    `latitude` decimal(20, 16) NOT NULL,
+    `longitude` decimal(20, 16) NOT NULL,
     `address` varchar(60) NOT NULL,
     `about` text, -- old description
     `observation` text,

@@ -22,9 +22,9 @@ export const Users = mysqlTable("Users", {
 export const Locales = mysqlTable("Locales", {
   id: int("id").notNull().autoincrement().primaryKey(),
   name: varchar("name", { length: 255 }).notNull(),
-  localizationLink: varchar("localizationLink", { length: 255 }).notNull(),
-  latitude: decimal("latitude", { precision: 10, scale: 3 }).notNull(),
-  longitude: decimal("longitude", { precision: 10, scale: 3 }).notNull(),
+  localizationLink: varchar("localizationLink", { length: 511 }).notNull(),
+  latitude: decimal("latitude", { precision: 20, scale: 16 }).notNull(),
+  longitude: decimal("longitude", { precision: 20, scale: 16 }).notNull(),
   address: varchar("address", { length: 60 }).notNull(),
   about: text("about"),
   observation: text("observation"),
