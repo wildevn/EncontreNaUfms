@@ -18,14 +18,16 @@ const deleteOldestHitoryLocaleService = async (
     .where(eq(Histories.userId, userId));
   // console.log("\n\n, viewdLocales: ", viewdLocales);
 
-  if (viewdLocales.length >= 2) {
+  const alreadyVisited: boolean =
+    viewdLocales.length > 0 &&
+    viewdLocales.findIndex((locale) => locale.localeId === localeId) >= 0;
+
+  if (viewdLocales.length >= 5 && !alreadyVisited) {
     const localeIdToDelete = viewdLocales.sort((a, b) => {
       return new Date(a.updatedAt).getTime() <= new Date(b.updatedAt).getTime()
         ? -1
         : 1;
     })[0].localeId;
-
-    // console.log("\n\n\nlocaleId: ", localeIdToDelete);
 
     await db
       .delete(Histories)
@@ -37,11 +39,6 @@ const deleteOldestHitoryLocaleService = async (
       );
   }
 
-  const alreadyVisited: boolean =
-    viewdLocales.length > 0 &&
-    viewdLocales.findIndex((locale) => locale.localeId === localeId) >= 0;
-
-  // console.log("alreadyVisited: ", alreadyVisited);
   if (alreadyVisited) {
     await db
       .update(Histories)
