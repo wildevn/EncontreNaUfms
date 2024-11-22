@@ -1,15 +1,14 @@
 import { getDbConnection } from "@/models/db";
 import {
   AcademicBlocks,
-  Histories,
   Libraries,
   Locales,
   ScheduledHours,
   Sports,
   Transports,
 } from "@/models/schema";
-import { and } from "drizzle-orm";
 import { eq, sql } from "drizzle-orm";
+import deleteOldestHitoryLocaleService from "./deleteOldestHitoryLocaleService";
 
 export type Hours = {
   sundayHours: string;
@@ -65,10 +64,11 @@ type ResultReply = {
 };
 
 const LocaleSections: Array<string> = [
-  "localization", // 0
-  "hours", // 1
-  "moreinfo", // 2
-  "all", // 3
+  "basic", // 0
+  "localization", // 1
+  "hours", // 2
+  "moreinfo", // 3
+  "all", // 4
 ];
 
 const getTableName = (
@@ -109,7 +109,7 @@ const listSectionService = async (
   userId: number,
   sectionId: string,
 ): Promise<ResultReply | undefined> => {
-  let result: Localization[] | Hours | MoreInfo | undefined;
+  let result: Localization[] | Localization | Hours | MoreInfo | undefined;
   const db = await getDbConnection();
   const index: number = sectionVerifier(sectionId);
 
@@ -120,57 +120,10 @@ const listSectionService = async (
   try {
     if (index === 0) {
       if (userId > 0) {
-        const alreadyVisited: boolean =
-          (
-            await db
-              .select()
-              .from(Histories)
-              .where(
-                and(
-                  eq(Histories.userId, userId),
-                  eq(Histories.localeId, localeId),
-                ),
-              )
-          ).length === 1;
-        const date = new Date();
-        // add after
-        //   TRIGGER `insert_after_deletion_oldest_history` BEFORE INSERT ON `histories` FOR EACH ROW IF (
-        //     SELECT COUNT(*)
-        //   FROM histories
-        //   WHERE userId = NEW.userId
-        //   ) >= 2 THEN
-
-        //     DELETE FROM histories as history
-        //     WHERE history.localeId = (
-        //        SELECT h.localeId
-        //       FROM histories as h
-        //       WHERE h.userId = NEW.userId
-        //       ORDER BY h.createdAt ASC
-        //       LIMIT 1
-        //     )
-        //    and history.userId = new.userId;
-        // END IF
         try {
-          if (alreadyVisited) {
-            await db
-              .update(Histories)
-              .set({ updatedAt: new Date() })
-              .where(
-                and(
-                  eq(Histories.userId, userId),
-                  eq(Histories.localeId, localeId),
-                ),
-              );
-          } else {
-            await db.insert(Histories).values({
-              userId,
-              localeId,
-              createdAt: date,
-              updatedAt: date,
-            });
-          }
+          await deleteOldestHitoryLocaleService(userId, localeId);
         } catch (error) {
-          // do nothing
+          console.log("\n\nerror ocurred: ", error);
         }
       }
 
@@ -179,10 +132,6 @@ const listSectionService = async (
         SELECT 
           locale.id,
           locale.name,
-          locale.address,
-          locale.localizationLink,
-          locale.latitude,
-          locale.longitude,
           locale.accessibility,
           json_arrayagg(json_object('id', photo.id, 'name', photo.name, 'url', photo.url)) as photos,
           locale.grade,
@@ -208,6 +157,21 @@ const listSectionService = async (
       result = (
         await db
           .select({
+            address: Locales.address,
+            localizationLink: Locales.localizationLink,
+            latitude: Locales.latitude,
+            longitude: Locales.longitude,
+          })
+          .from(Locales)
+          .where(eq(Locales.id, localeId))
+      )[0] as unknown as Localization;
+
+      return { result, status: 200 };
+    }
+    if (index === 2) {
+      result = (
+        await db
+          .select({
             sundayHours: ScheduledHours.sundayHours,
             mondayHours: ScheduledHours.mondayHours,
             tuesdayHours: ScheduledHours.tuesdayHours,
@@ -221,7 +185,7 @@ const listSectionService = async (
       )[0] as Hours;
       return { result, status: 200 };
     }
-    if (index === 2) {
+    if (index === 3) {
       result = (
         await db
           .select({
@@ -250,7 +214,7 @@ const listSectionService = async (
 
       return { result, status: 200 };
     }
-    if (index === 3) {
+    if (index === 4) {
       result = (
         await db.execute(sql`
         SELECT 
@@ -303,6 +267,10 @@ const listSectionService = async (
             .from(tableName)
             .where(eq(tableName.localeId, localeId))
         )[0] as unknown as MoreInfo;
+      }
+
+      if (result[0].photos.length === 1 && result[0].photos[0].id === null) {
+        result[0].photos = [];
       }
 
       return { result: result[0], status: 200 };
