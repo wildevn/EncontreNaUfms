@@ -20,6 +20,9 @@ import updateLocaleService, {
 } from "@/services/localesServices/updateLocaleService";
 import deleteLocaleService from "@/services/localesServices/deleteLocaleService";
 import verifyToken from "@/helpers/verifyToken";
+import isAuth from "@/middlewares/isAuth";
+import sendSuggestionEmail from "@/helpers/sendSuggestionEmail";
+import getUserInfoService from "@/services/userServices/getUserInfoService";
 // import updateLocaleService from "@/services/localesServices/UpdateLocaleService";
 // import { request } from "node:http";
 
@@ -127,7 +130,7 @@ export const insertLocaleOtps: RouteShorthandOptions = {
             accessibility: { type: "boolean" },
 
             photos: {
-              type: "array",
+              type: ["array", "null"],
               items: {
                 type: "object",
                 properties: {
@@ -138,7 +141,7 @@ export const insertLocaleOtps: RouteShorthandOptions = {
             },
 
             schedule: {
-              type: "object",
+              type: ["object", "null"],
               properties: {
                 monday: { type: "string" },
                 tuesday: { type: "string" },
@@ -152,7 +155,7 @@ export const insertLocaleOtps: RouteShorthandOptions = {
 
             // for specific types (AcademicBlocks, Libraries, Sports, Transports)
             specialInfo: {
-              type: "object",
+              type: ["object", "null"],
               properties: {
                 course: { type: "string" },
                 libraryLink: { type: "string" },
@@ -166,6 +169,7 @@ export const insertLocaleOtps: RouteShorthandOptions = {
       },
     },
   },
+  preHandler: isAuth,
 };
 
 export const editLocaleOtps: RouteShorthandOptions = {
@@ -242,6 +246,7 @@ export const editLocaleOtps: RouteShorthandOptions = {
       },
     },
   },
+  preHandler: isAuth,
 };
 
 export const deleteLocaleOpts: RouteShorthandOptions = {
@@ -354,8 +359,23 @@ const insert = async (
   reply: FastifyReply,
 ) => {
   const { locale } = request.body;
+  const { authorization } = request.headers;
+  let newLocale: Result;
 
-  const newLocale: Result = await createLocaleService(locale);
+  const userEmail: string = decodeToken(authorization || "", "email") as string;
+
+  if (userEmail === process.env.ADMIN_EMAIL) {
+    newLocale = await createLocaleService(locale);
+  } else {
+    const { user } = await getUserInfoService(userEmail);
+    newLocale = await sendSuggestionEmail(
+      locale,
+      true,
+      user?.email || "",
+      user?.name || "",
+    );
+    return { status: 200, result: "email sent" };
+  }
 
   if ("error" in newLocale) {
     return reply.status(newLocale.status).send({ error: newLocale.error });
@@ -369,12 +389,27 @@ const edit = async (
 ) => {
   const { locale } = request.body;
   const { localeId } = request.params;
+  const { authorization } = request.headers;
+
+  const userEmail: string = decodeToken(authorization || "", "email") as string;
+  let updatedLocale: EditResult;
 
   if (localeId) {
-    const updatedLocale: EditResult = await updateLocaleService(
-      locale,
-      Number.parseInt(localeId),
-    );
+    if (userEmail === process.env.ADMIN_EMAIL) {
+      updatedLocale = await updateLocaleService(
+        locale,
+        Number.parseInt(localeId),
+      );
+    } else {
+      const { user } = await getUserInfoService(userEmail);
+      updatedLocale = await sendSuggestionEmail(
+        locale as Locale,
+        true,
+        user?.email || "",
+        user?.name || "",
+      );
+    }
+
     if ("error" in updatedLocale) {
       return reply
         .status(updatedLocale.status)
