@@ -80,14 +80,14 @@ CREATE TABLE `Reviews` (
 
 CREATE TABLE `AcademicBlocks` (
     `localeId` int NOT NULL,
-    `course` varchar(30) NOT NULL,
+    `course` varchar(255) NOT NULL,
     `createdAt` datetime NOT NULL,
     `updatedAt` datetime NOT NULL
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
 
 CREATE TABLE `Libraries` (
     `localeId` int NOT NULL,
-    `libraryLink` varchar(30) NOT NULL,
+    `libraryLink` varchar(255) NOT NULL,
     `rules` text,
     `createdAt` datetime NOT NULL,
     `updatedAt` datetime NOT NULL
@@ -103,7 +103,7 @@ CREATE TABLE `Sports` (
 
 CREATE TABLE `Transports` (
     `localeId` int NOT NULL,
-    `availableBuses` varchar(30) NOT NULL,
+    `availableBuses` varchar(127) NOT NULL,
     `createdAt` datetime NOT NULL,
     `updatedAt` datetime NOT NULL
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
