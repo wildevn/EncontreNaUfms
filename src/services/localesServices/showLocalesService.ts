@@ -110,7 +110,7 @@ const categoryVerifier = (
       const categories: Array<number> = [];
       for (const category of categoryList) {
         const number: number | typeof NaN = Number.parseInt(category.trim());
-        console.log("number", number, "!isNaN", !Number.isNaN(number));
+
         if (!Number.isNaN(number)) {
           categories.push(number);
         } else {
