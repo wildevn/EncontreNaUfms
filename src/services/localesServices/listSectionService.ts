@@ -1,32 +1,14 @@
 import { getDbConnection } from "@/models/db";
 import {
   AcademicBlocks,
-  Histories,
   Libraries,
   Locales,
   ScheduledHours,
   Sports,
   Transports,
 } from "@/models/schema";
-import { and } from "drizzle-orm";
 import { eq, sql } from "drizzle-orm";
-
-type Localization = {
-  id: number;
-  name: string;
-  address: string;
-  localizationLink: string;
-  latitude: number;
-  longitude: number;
-  accessibility: string;
-  photos: Array<{
-    id: number;
-    name: string;
-    url: string;
-  }>;
-  grade: number;
-  favorite: boolean;
-};
+import deleteOldestHitoryLocaleService from "./deleteOldestHitoryLocaleService";
 
 export type Hours = {
   sundayHours: string;
@@ -52,6 +34,29 @@ type MoreInfo = {
   updatedAt?: Date;
 };
 
+type Localization = {
+  id: number;
+  name: string;
+  address: string;
+  localizationLink: string;
+  latitude: number;
+  longitude: number;
+  accessibility: string;
+  photos: Array<{
+    id: number;
+    name: string;
+    url: string;
+  }>;
+  grade: number;
+  favorite: boolean;
+  about?: string;
+  observation?: string;
+  type?: number;
+  phoneNumber?: string;
+  schedule?: Hours;
+  specialInfo?: MoreInfo;
+};
+
 type ResultReply = {
   result?: Localization | Hours | MoreInfo;
   error?: string;
@@ -59,9 +64,11 @@ type ResultReply = {
 };
 
 const LocaleSections: Array<string> = [
-  "localization", // 0
-  "hours", // 1
-  "moreinfo", // 2
+  "basic", // 0
+  "localization", // 1
+  "hours", // 2
+  "moreinfo", // 3
+  "all", // 4
 ];
 
 const getTableName = (
@@ -102,7 +109,7 @@ const listSectionService = async (
   userId: number,
   sectionId: string,
 ): Promise<ResultReply | undefined> => {
-  let result: Localization[] | Hours | MoreInfo | undefined;
+  let result: Localization[] | Localization | Hours | MoreInfo | undefined;
   const db = await getDbConnection();
   const index: number = sectionVerifier(sectionId);
 
@@ -113,40 +120,10 @@ const listSectionService = async (
   try {
     if (index === 0) {
       if (userId > 0) {
-        const alreadyVisited: boolean =
-          (
-            await db
-              .select()
-              .from(Histories)
-              .where(
-                and(
-                  eq(Histories.userId, userId),
-                  eq(Histories.localeId, localeId),
-                ),
-              )
-          ).length === 1;
-        const date = new Date();
         try {
-          if (alreadyVisited) {
-            await db
-              .update(Histories)
-              .set({ updatedAt: new Date() })
-              .where(
-                and(
-                  eq(Histories.userId, userId),
-                  eq(Histories.localeId, localeId),
-                ),
-              );
-          } else {
-            await db.insert(Histories).values({
-              userId,
-              localeId,
-              createdAt: date,
-              updatedAt: date,
-            });
-          }
+          await deleteOldestHitoryLocaleService(userId, localeId);
         } catch (error) {
-          // do nothing
+          console.log("\n\nerror ocurred: ", error);
         }
       }
 
@@ -155,10 +132,6 @@ const listSectionService = async (
         SELECT 
           locale.id,
           locale.name,
-          locale.address,
-          locale.localizationLink,
-          locale.latitude,
-          locale.longitude,
           locale.accessibility,
           json_arrayagg(json_object('id', photo.id, 'name', photo.name, 'url', photo.url)) as photos,
           locale.grade,
@@ -184,6 +157,21 @@ const listSectionService = async (
       result = (
         await db
           .select({
+            address: Locales.address,
+            localizationLink: Locales.localizationLink,
+            latitude: Locales.latitude,
+            longitude: Locales.longitude,
+          })
+          .from(Locales)
+          .where(eq(Locales.id, localeId))
+      )[0] as unknown as Localization;
+
+      return { result, status: 200 };
+    }
+    if (index === 2) {
+      result = (
+        await db
+          .select({
             sundayHours: ScheduledHours.sundayHours,
             mondayHours: ScheduledHours.mondayHours,
             tuesdayHours: ScheduledHours.tuesdayHours,
@@ -197,7 +185,7 @@ const listSectionService = async (
       )[0] as Hours;
       return { result, status: 200 };
     }
-    if (index === 2) {
+    if (index === 3) {
       result = (
         await db
           .select({
@@ -225,6 +213,67 @@ const listSectionService = async (
       }
 
       return { result, status: 200 };
+    }
+    if (index === 4) {
+      result = (
+        await db.execute(sql`
+        SELECT 
+          locale.id,
+          locale.name,
+          locale.address,
+          locale.localizationLink,
+          locale.latitude,
+          locale.longitude,
+          locale.accessibility,
+          locale.about,
+          locale.phoneNumber,
+          locale.type,
+          locale.observation,
+          json_arrayagg(json_object('id', photo.id, 'name', photo.name, 'url', photo.url)) as photos,
+          locale.grade,
+          CASE WHEN favorite.localeId = locale.id AND favorite.userId = ${userId} THEN true ELSE false END as favorite
+        FROM 
+          Locales AS locale
+        LEFT JOIN
+          Photos AS photo ON locale.id = photo.localeId
+        LEFT JOIN
+          Favorites AS favorite ON locale.id = favorite.localeId AND favorite.userId = ${userId}
+        WHERE
+          locale.id = ${localeId}
+        `)
+      )[0] as unknown as Localization[];
+
+      result[0].schedule = (
+        await db
+          .select({
+            sundayHours: ScheduledHours.sundayHours,
+            mondayHours: ScheduledHours.mondayHours,
+            tuesdayHours: ScheduledHours.tuesdayHours,
+            wednesdayHours: ScheduledHours.wednesdayHours,
+            thursdayHours: ScheduledHours.thursdayHours,
+            fridayHours: ScheduledHours.fridayHours,
+            saturdayHours: ScheduledHours.saturdayHours,
+          })
+          .from(ScheduledHours)
+          .where(eq(ScheduledHours.localeId, localeId))
+      )[0] as Hours;
+
+      if ([0, 5, 6, 7].includes(result[0].type as number)) {
+        const tableName = getTableName(result[0].type as number);
+
+        result[0].specialInfo = (
+          await db
+            .select()
+            .from(tableName)
+            .where(eq(tableName.localeId, localeId))
+        )[0] as unknown as MoreInfo;
+      }
+
+      if (result[0].photos.length === 1 && result[0].photos[0].id === null) {
+        result[0].photos = [];
+      }
+
+      return { result: result[0], status: 200 };
     }
   } catch (error) {
     if (error instanceof Error) {

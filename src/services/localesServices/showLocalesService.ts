@@ -73,20 +73,27 @@ export const LocaleTypes: Array<string> = [
 ];
 
 const reduceHours = (array: string[]): number => {
-  return Number.parseInt(array[0]) + Number.parseInt(array[1]) * 60;
+  return Number.parseInt(array[1]) + Number.parseInt(array[0]) * 60;
 };
 
 export const isOpenned = (scheduleRow: ScheduledHoursRow): number => {
   const now = new Date();
   const dayAttribute: string = scheduleAttributes[now.getDay()];
   // format 15:00 - 23:00
-  const scheduleHour: string[] = (
-    scheduleRow[dayAttribute as keyof ScheduledHoursRow] as string
-  )?.split("-");
+  const scheduleHour = scheduleRow[
+    dayAttribute as keyof ScheduledHoursRow
+  ] as string;
+  const scheduleHourArray: string[] = scheduleHour
+    ? scheduleHour.split("-")
+    : [];
 
-  if (scheduleHour) {
-    const startMinutes: number = reduceHours(scheduleHour[0].split(":"));
-    const endHMinutes: number = reduceHours(scheduleHour[1].split(":"));
+  if (scheduleHourArray && scheduleHourArray.length === 2) {
+    const startMinutes: number = reduceHours(
+      scheduleHourArray[0].trim().split(":"),
+    );
+    const endHMinutes: number = reduceHours(
+      scheduleHourArray[1].trim().split(":"),
+    );
     const nowMinutes: number = now.getHours() * 60 + now.getMinutes();
 
     if (nowMinutes >= startMinutes && nowMinutes < endHMinutes) {
@@ -103,7 +110,7 @@ const categoryVerifier = (
       const categories: Array<number> = [];
       for (const category of categoryList) {
         const number: number | typeof NaN = Number.parseInt(category.trim());
-        console.log("number", number, "!isNaN", !Number.isNaN(number));
+
         if (!Number.isNaN(number)) {
           categories.push(number);
         } else {

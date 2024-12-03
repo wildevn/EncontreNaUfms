@@ -262,7 +262,7 @@
         },
         "localizationLink": {
           "name": "localizationLink",
-          "type": "varchar(255)",
+          "type": "varchar(511)",
           "primaryKey": false,
           "notNull": true,
           "autoincrement": false

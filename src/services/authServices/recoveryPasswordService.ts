@@ -2,7 +2,7 @@ import type { User } from "@services/userServices/createOrUpdateUserService";
 import { getDbConnection } from "@/models/db";
 import { Users } from "@/models/schema";
 import { eq } from "drizzle-orm";
-import sendEmail from "@/helpers/sendEmail";
+import sendRecoveryEmail from "@/helpers/sendRecoveryEmail";
 import tokenStash from "@/helpers/TokenStash";
 
 export type Reply = {
@@ -32,7 +32,7 @@ const recoveryPasswordService = async (email: string): Promise<Reply> => {
 
     const token: number = tokenStash.generateToken(user.email);
 
-    const emailSent: any = await sendEmail(user.name, email, token);
+    const emailSent: any = await sendRecoveryEmail(user.name, email, token);
 
     if (emailSent instanceof Error) {
       return { error: emailSent.message, status: 500 };

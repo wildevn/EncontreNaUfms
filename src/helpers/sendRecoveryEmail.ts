@@ -1,6 +1,6 @@
 import mailjet, { defaultFrom } from "./mailjet";
 
-const sendEmail = async (
+const sendRecoveryEmail = async (
   userName: string,
   userEmail: string,
   token: number,
@@ -9,7 +9,7 @@ const sendEmail = async (
   try {
     const htmlEmail = `<div style="width: 100%; height: 100%; background-color: #0088B7; padding: 10px 15px; margin: 0; display: flex; flex-direction: column; align-items: center; justify-content: center; font-family: Helvetica; flex-wrap:">
                         <h1>Encontre Na Ufms app</h1>
-                        <div style="background-color: #1F1F1F; width: 90%; padding: 10px 25px; border-radius: 5px; color: white; word-break: break-all;">
+                        <div style="background-color: #1F1F1F; width: 90%; padding: 10px 25px; border-radius: 5px; color: white; word-break: break-word;">
                           <h3> Recebemos sua solicitação para recuperação de senha </h3>
                           <p style="padding-top: 40px;"> Copie o token abaixo e o cole no seu aplicativo para continuar o processo de recuperação </p>
                           <span> 
@@ -46,4 +46,4 @@ const sendEmail = async (
   }
 };
 
-export default sendEmail;
+export default sendRecoveryEmail;

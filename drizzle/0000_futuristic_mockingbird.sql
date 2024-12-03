@@ -1,6 +1,6 @@
 CREATE TABLE `AcademicBlocks` (
 	`localeId` int NOT NULL,
-	`course` varchar(30) NOT NULL,
+	`course` varchar(255) NOT NULL,
 	`createdAt` date NOT NULL,
 	`updatedAt` date NOT NULL,
 	CONSTRAINT `AcademicBlocks_localeId_unique` UNIQUE(`localeId`)
@@ -24,7 +24,7 @@ CREATE TABLE `Histories` (
 --> statement-breakpoint
 CREATE TABLE `Libraries` (
 	`localeId` int NOT NULL,
-	`libraryLink` varchar(30) NOT NULL,
+	`libraryLink` varchar(255) NOT NULL,
 	`rules` text,
 	`createdAt` date NOT NULL,
 	`updatedAt` date NOT NULL,
@@ -34,9 +34,9 @@ CREATE TABLE `Libraries` (
 CREATE TABLE `Locales` (
 	`id` int AUTO_INCREMENT NOT NULL,
 	`name` varchar(255) NOT NULL,
-	`localizationLink` varchar(255) NOT NULL,
-	`latitude` decimal(10, 3) NOT NULL,
-  `longitude` decimal(10, 3) NOT NULL,
+	`localizationLink` varchar(511) NOT NULL,
+	`latitude` decimal(20, 16) NOT NULL,
+  `longitude` decimal(20, 16) NOT NULL,
 	`address` varchar(60) NOT NULL,
 	`about` text,
 	`observation` text,
@@ -94,7 +94,7 @@ CREATE TABLE `Sports` (
 --> statement-breakpoint
 CREATE TABLE `Transports` (
 	`localeId` int NOT NULL,
-	`availableBuses` varchar(30) NOT NULL,
+	`availableBuses` varchar(127) NOT NULL,
 	`rules` text,
 	`createdAt` date NOT NULL,
 	`updatedAt` date NOT NULL,

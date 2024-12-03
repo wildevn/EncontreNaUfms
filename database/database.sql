@@ -14,9 +14,9 @@ CREATE TABLE `Users` (
 CREATE TABLE `Locales` (
     `id` int NOT NULL AUTO_INCREMENT PRIMARY KEY,
     `name` varchar(255) NOT NULL,
-    `localizationLink` varchar(255) NOT NULL,
-    `latitude` decimal(10, 3) NOT NULL,
-    `longitude` decimal(10, 3) NOT NULL,
+    `localizationLink` varchar(511) NOT NULL,
+    `latitude` decimal(20, 16) NOT NULL,
+    `longitude` decimal(20, 16) NOT NULL,
     `address` varchar(60) NOT NULL,
     `about` text, -- old description
     `observation` text,
@@ -80,14 +80,14 @@ CREATE TABLE `Reviews` (
 
 CREATE TABLE `AcademicBlocks` (
     `localeId` int NOT NULL,
-    `course` varchar(30) NOT NULL,
+    `course` varchar(255) NOT NULL,
     `createdAt` datetime NOT NULL,
     `updatedAt` datetime NOT NULL
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
 
 CREATE TABLE `Libraries` (
     `localeId` int NOT NULL,
-    `libraryLink` varchar(30) NOT NULL,
+    `libraryLink` varchar(255) NOT NULL,
     `rules` text,
     `createdAt` datetime NOT NULL,
     `updatedAt` datetime NOT NULL
@@ -103,7 +103,7 @@ CREATE TABLE `Sports` (
 
 CREATE TABLE `Transports` (
     `localeId` int NOT NULL,
-    `availableBuses` varchar(30) NOT NULL,
+    `availableBuses` varchar(127) NOT NULL,
     `createdAt` datetime NOT NULL,
     `updatedAt` datetime NOT NULL
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;

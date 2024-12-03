@@ -12,7 +12,13 @@ import { eq } from "drizzle-orm";
 import type { ResultAction } from "./createOrUpdateReviewService";
 import { scheduleAttributes } from "./showLocalesService";
 import type { Hours } from "./listSectionService";
+import fs from "node:fs";
 
+type Photo = {
+  id?: number;
+  name?: string;
+  data?: string;
+};
 export type EditLocale = {
   name?: string;
   localizationLink?: string;
@@ -25,10 +31,7 @@ export type EditLocale = {
   phoneNumber?: string;
   accessibility?: number;
   updatedAt: Date;
-  photos?: Array<{
-    name: string;
-    data: string;
-  }>;
+  photos?: Array<Photo>;
   schedule?: {
     monday: string;
     tuesday: string;
@@ -220,6 +223,53 @@ const updateLocaleService = async (
       }
       if (photos) {
         // search and add photos
+        try {
+          const currentLocalePhotosIds: Photo[] = await db
+            .select({ id: Photos.id })
+            .from(Photos)
+            .where(eq(Photos.localeId, localeId));
+          if (currentLocalePhotosIds?.length > 0) {
+            for (const photoId of currentLocalePhotosIds) {
+              if (photos.findIndex((photo) => photo.id === photoId.id) === -1) {
+                await db.delete(Photos).where(eq(Photos.id, photoId.id || 0));
+              }
+            }
+          }
+
+          for (const photo of photos) {
+            try {
+              if (photo.id) {
+                continue;
+              }
+              if (photo.data) {
+                const newPhotoUrl = `/public/${date.getTime()}_${photo.name}`;
+                fs.writeFileSync(`.${newPhotoUrl}`, photo.data, {
+                  encoding: "base64",
+                });
+
+                const photoId = (
+                  await db
+                    .insert(Photos)
+                    .values({
+                      localeId: localeId,
+                      name: photo?.name || "photo",
+                      url: newPhotoUrl,
+                      createdAt: date,
+                      updatedAt: date,
+                    })
+                    .$returningId()
+                )[0];
+              }
+            } catch (err) {
+              result.photos = "failed to update";
+            }
+          }
+          result.photos = "updated";
+        } catch (err) {
+          if (err) {
+            result.photos = "failed to update";
+          }
+        }
       }
       if (schedule) {
         try {
@@ -298,8 +348,7 @@ const updateLocaleService = async (
           }
         }
         if (
-          (basicLocaleInfo.type &&
-            typeof basicLocaleInfo.type === "number" &&
+          (typeof basicLocaleInfo?.type === "number" &&
             [0, 5, 6, 7].includes(basicLocaleInfo.type)) ||
           (typeof basicLocaleInfo?.type !== "number" &&
             [0, 5, 6, 7].includes(localeRow.type))
@@ -338,7 +387,6 @@ const updateLocaleService = async (
               )[0];
             }
           } catch (error) {
-            console.log(error);
             result.specialInfo = "failed to update";
           }
         }
