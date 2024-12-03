@@ -73,7 +73,7 @@ export const LocaleTypes: Array<string> = [
 ];
 
 const reduceHours = (array: string[]): number => {
-  return Number.parseInt(array[0]) + Number.parseInt(array[1]) * 60;
+  return Number.parseInt(array[1]) + Number.parseInt(array[0]) * 60;
 };
 
 export const isOpenned = (scheduleRow: ScheduledHoursRow): number => {
@@ -88,8 +88,12 @@ export const isOpenned = (scheduleRow: ScheduledHoursRow): number => {
     : [];
 
   if (scheduleHourArray && scheduleHourArray.length === 2) {
-    const startMinutes: number = reduceHours(scheduleHourArray[0].split(":"));
-    const endHMinutes: number = reduceHours(scheduleHourArray[1].split(":"));
+    const startMinutes: number = reduceHours(
+      scheduleHourArray[0].trim().split(":"),
+    );
+    const endHMinutes: number = reduceHours(
+      scheduleHourArray[1].trim().split(":"),
+    );
     const nowMinutes: number = now.getHours() * 60 + now.getMinutes();
 
     if (nowMinutes >= startMinutes && nowMinutes < endHMinutes) {
